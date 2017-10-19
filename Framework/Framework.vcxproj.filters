@@ -1,0 +1,56 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="source files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="header files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="source files\debug">
+      <UniqueIdentifier>{84b70f3d-b24a-4bbd-a879-0f6273ca5c08}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="source files\core">
+      <UniqueIdentifier>{6b95885d-a6f8-44c3-bb1b-9f180ff0da4f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="header files\core">
+      <UniqueIdentifier>{547dcef0-5637-4900-9883-2570fc21be9a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="header files\debug">
+      <UniqueIdentifier>{2e15f862-d441-4a5f-b8b5-fc3e61d5a1eb}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="include\framework.h">
+      <Filter>header files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\core\fw_define.h">
+      <Filter>header files\core</Filter>
+    </ClInclude>
+    <ClInclude Include="include\core\fw_types.h">
+      <Filter>header files\core</Filter>
+    </ClInclude>
+    <ClInclude Include="include\debug\fw_debug_log.h">
+      <Filter>header files\debug</Filter>
+    </ClInclude>
+    <ClInclude Include="include\debug\fw_debug_log_type.h">
+      <Filter>header files\debug</Filter>
+    </ClInclude>
+    <ClInclude Include="include\debug\fw_debug_log_stream.h">
+      <Filter>header files\debug</Filter>
+    </ClInclude>
+    <ClInclude Include="source\precompiled.h">
+      <Filter>header files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="source\debug\fw_debug_log.cpp">
+      <Filter>source files\debug</Filter>
+    </ClCompile>
+    <ClCompile Include="source\precompiled.cpp">
+      <Filter>source files</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>
