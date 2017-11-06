@@ -161,6 +161,8 @@ public:
         }
 
         //! @todo キューに積む
+
+        return FW_OK;
     }
 
     // 処理を送出する
@@ -170,7 +172,7 @@ public:
 
     // 実行中の処理が完了するまで待つ
     virtual sint32_t DoWait(const uint32_t milliseconds) FW_OVERRIDE {
-
+        return FW_OK;
     }
 
 
@@ -232,11 +234,18 @@ public:
         }
 
         //! @todo キューに積む
+
+        return FW_OK;
+    }
+
+    // 処理を送出する
+    virtual void DoSubmit() FW_OVERRIDE {
+
     }
 
     // 実行中のジョブが完了するまで待つ
     virtual sint32_t DoWait(const uint32_t milliseconds) FW_OVERRIDE {
-
+        return FW_OK;
     }
 
 
