@@ -8,75 +8,71 @@
 //---------------------------------------------
 // defined platform
 //---------------------------------------------
-#if defined(WIN64)
+#if defined(WIN32) || defined(WIN64)
     #define FW_PLATFORM_WIN32           (1)
-    #define FW_PLATFORM_WIN64           (1)
-    #define FW_PLATFORM_UNKNOWN         (0)
-#elif defined(WIN32)
-    #define FW_PLATFORM_UNKNOWN         (0)
-    #define FW_PLATFORM_WIN32           (1)
-    #define FW_PLATFORM_WIN64           (0)
-#elif defined(WINRT)
-    #define FW_PLATFORM_UNKNOWN         (0)
-    #define FW_PLATFORM_WIN32           (0)
-    #define FW_PLATFORM_WIN64           (0)
-#else
-    #define FW_PLATFORM_WIN32           (0)
-    #define FW_PLATFORM_WIN64           (0)
-    #define FW_PLATFORM_UNKNOWN         (1)
-#endif
+    #if defined(WIN64)
+        #define FW_PLATFORM_WIN64       (1)
+    #endif
+    #if defined(WINAPI_FAMILY) && (WINAPI_FAMILY == WINAPI_FAMILY_APP)
+        #define FW_PLATFORM_WINSTORE    (1)
+    #endif
 
-//---------------------------------------------
-// defined cpu architecture
-//---------------------------------------------
-#if defined(_M_AMD64) || defined(_M_X64)
-    #define FW_ARCH_X64                 (1)
-#else
-    #define FW_ARCH_X64                 (0)
-#endif
-
-#if defined(_M_IX86)
-    #define FW_ARCH_X86                 (1)
-#else
-    #define FW_ARCH_X86                 (0)
-#endif
-
-#if defined(_M_ARM_FP)
-#define FW_ARCH_ARM                 (1)
-    #if (30 <= _M_ARM_FP) && (_M_ARM_FP <= 39)
-        #define FW_ARCH_ARM_VFPV3       (1)
-        #define FW_ARCH_ARM_VFPV4       (0)
-    #elif (40 <= _M_ARM_FP) && (_M_ARM_FP <= 49)
-        #define FW_ARCH_ARM_VFPV3       (0)
-        #define FW_ARCH_ARM_VFPV4       (1)
+    #if defined(_M_AMD64) || defined(_M_X64)
+        #define FW_ARCH_X64             (1)
+    #elif defined(_M_IX86)
+        #define FW_ARCH_X86             (1)
+    #elif defined(_M_ARM)
+        #define FW_ARCH_ARM             (1)
     #else
-        #define FW_ARCH_ARM_VFPV3       (0)
-        #define FW_ARCH_ARM_VFPV4       (0)
+        #error Unsupported architecture
+    #endif
+
+    #if defined(_M_ARM_FP)
+        #if (30 <= _M_ARM_FP) && (_M_ARM_FP <= 39)
+            #define FW_ARCH_ARM_VFPV3   (1)
+        #elif (40 <= _M_ARM_FP) && (_M_ARM_FP <= 49)
+            #define FW_ARCH_ARM_VFPV4   (1)
+        #endif
+    #endif
+
+    #if FW_ARCH_X64 || FW_ARCH_X86
+        #define FW_LITTLE_ENDIAN        (1)
+    #elif FW_ARCH_ARM
+        #define FW_BIG_ENDIAN           (1)
+    #endif
+#elif defined(__APPLE__) || defined(__MACH__)
+    #include "TargetConditionals.h"
+    #define FW_PLATFORM_MAC             (1)
+    
+    #if defined(TARGET_CPU_PPC)
+        #define FW_ARCH_PPC             (1)
+    #elif defined(TARGET_CPU_PPC64)
+        #define FW_ARCH_PPC64           (1)
+    #elif defined(TARGET_CPU_68K)
+        #define FW_ARCH_68K             (1)
+    #elif defined(TARGET_CPU_X86)
+        #define FW_ARCH_X86             (1)
+    #elif defined(TARGET_CPU_X86_64)
+        #define FW_ARCH_X64             (1)
+    #elif defined(TARGET_CPU_ARM)
+        #define FW_ARCH_ARM             (1)
+    #elif defined(TARGET_CPU_MIPS)
+        #define FW_ARCH_MIPS            (1)
+    #elif defined(TARGET_CPU_SPARC)
+        #define FW_ARCH_SPARC           (1)
+    #elif defined(TARGET_CPU_ALPHA)
+        #define FW_ARCH_ALPHA           (1)
+    #else
+        #error Unsupported architecture
+    #endif
+
+    #if TARGET_RT_LITTLE_ENDIAN
+        #define FW_LITTLE_ENDIAN        (1)
+    #elif TARGET_RT_BIG_ENDIAN
+        #define FW_BIG_ENDIAN           (1)
     #endif
 #else
-    #define FW_ARCH_ARM                 (0)
-    #define FW_ARCH_ARM_VFPV3           (0)
-    #define FW_ARCH_ARM_VFPV4           (0)
-#endif
-
-#if !FW_ARCH_X86 && !FW_ARCH_X64 && !FW_ARCH_ARM
-    #define CORE_ARCH_UNKNOWN           (1)
-#else
-    #define CORE_ARCH_UNKNOWN           (0)
-#endif
-
-//---------------------------------------------
-// defined endian type
-//---------------------------------------------
-#if FW_ARCH_X64 || FW_ARCH_X86
-    #define FW_BIG_ENDIAN               (0)
-    #define FW_LITTLE_ENDIAN            (1)
-#elif FW_ARCH_ARM
-    #define FW_BIG_ENDIAN               (1)
-    #define FW_LITTLE_ENDIAN            (0)
-#else
-    #define FW_BIG_ENDIAN               (0)
-    #define FW_LITTLE_ENDIAN            (1)
+    #error Unsupported platform
 #endif
 
 
@@ -85,25 +81,14 @@
 //---------------------------------------------
 #if defined(_DEBUG)
     #define FW_DEBUG                    (1)
-#else
-    #define FW_DEBUG                    (0)
-#endif
-
-#if defined(_NDEBUG)
+#elif defined(_NDEBUG)
     #define FW_RELEASE                  (1)
-#else
-    #define FW_RELEASE                  (0)
 #endif
 
 #if defined(STATIC_LIB)
     #define FW_STATIC_LIB               (1)
-    #define FW_DLL_BUILD                (0)
 #elif defined(DLL_BUILD)
-    #define FW_STATIC_LIB               (0)
     #define FW_DLL_BUILD                (1)
-#else
-    #define FW_STATIC_LIB               (1)
-    #define FW_DLL_BUILD                (0)
 #endif
 
 
@@ -112,13 +97,8 @@
 //---------------------------------------------
 #if defined(_UNICODE)
     #define FW_UNICODE                  (1)
-    #define FW_MBCS                     (0)
 #elif defined(_MBCS)
-    #define FW_UNICODE                  (0)
     #define FW_MBCS                     (1)
-#else
-    #define FW_UNICODE                  (1)
-    #define FW_MBCS                     (0)
 #endif
 
 //---------------------------------------------
@@ -133,14 +113,13 @@
 #define FW_COMPILER_VS2017              (1910)
 
 #if defined(_MSC_VER)
-    #define FW_COMPILER_VS              _MSC_VER
-    #define FW_COMPILER_GCC             (0)
+    #define FW_COMPILER_MSC             _MSC_VER
 #elif defined(__GNUC__)
-    #define FW_COMPILER_VS              (0)
     #define FW_COMPILER_GCC             __GNUC__
-#else
-    #define FW_COMPILER_VS              (0)
-    #define FW_COMPILER_GCC             (0)
+#elif defined(__ICL)
+    #define FW_COMPILER_INTEL           __ICL
+#elif defined(__clang__)
+    #define FW_COMPILER_CLANG           __GNUC__
 #endif
 
 //---------------------------------------------
@@ -157,18 +136,34 @@
 //---------------------------------------------
 // dll export 
 //---------------------------------------------
-#if FW_PLATFORM_WIN32
-    #if FW_STATIC_LIB
-        #define FW_EXTERN               extern
-        #define FW_EXPORT
-    #elif FW_DLL_BUILD
-        #define FW_EXTERN               extern __declspec(dllexport)
-        #define FW_EXPORT               __declspec(dllexport)
-    #else
-        #define FW_EXTERN               extern __declspec(dllimport)
-        #define FW_EXPORT               __declspec(dllimport)
-    #endif
+#if defined(FW_COMPILER_MSC) || defined(FW_COMPILER_INTEL)
+    #define FW_IMPORT                   __declspec(dllimport)
+    #define FW_EXPORT                   __declspec(dllexport)
+    #define FW_IMPORT_FUNC              extern "C" __declspec(dllimport)
+    #define FW_EXPORT_FUNC              extern "C" __declspec(dllexport)
+#elif defined(FW_COMPILER_GCC)
+    #define FW_IMPORT                   __attribute__((visibility("default")))
+    #define FW_EXPORT                   __attribute__((visibility("default")))
+    #define FW_IMPORT_FUNC              __attribute__((visibility("default")))
+    #define FW_EXPORT_FUNC              __attribute__((visibility("default")))
+#else
+    #define FW_IMPORT
+    #define FW_EXPORT
+    #define FW_IMPORT_FUNC
+    #define FW_EXPORT_FUNC
 #endif
+
+#if defined(FW_STATIC_LIB)
+    #define FW_DLL
+    #define FW_DLL_FUNC                 extern
+#elif defined(FW_DLL_BUILD)
+    #define FW_DLL                      FW_EXPORT
+    #define FW_DLL_FUNC                 FW_EXPORT_FUNC
+#else
+    #define FW_DLL                      FW_IMPORT
+    #define FW_DLL_FUNC                 FW_IMPORT_FUNC
+#endif
+
 
 //---------------------------------------------
 // namespace
@@ -176,11 +171,19 @@
 #ifndef FW_UNUSE_NAMESPACE
     #define BEGIN_NAMESPACE_FW
     #define END_NAMESPACE_FW
+    #define NAMESPACE_FW
     #define USING_NAMESPACE_FW
+    
+    #define BEGIN_NAMESPACE_NONAME
+    #define END_NAMESPACE_NONAME
 #else
     #define BEGIN_NAMESPACE_FW          namespace fw {
-    #define END_NAMESPACE_FW            }
+    #define END_NAMESPACE_FW            }   // namespace "fw"
+    #define NAMESPACE_FW                fw::
     #define USING_NAMESPACE_FW          using namespace fw;
+
+#define BEGIN_NAMESPACE_NONAME          namespace {
+#define END_NAMESPACE_NONAME            }   // namespace ""
 #endif
 
 //---------------------------------------------
@@ -223,7 +226,7 @@
 //---------------------------------------------
 template<typename T, typename U>
 T DYNAMIC_CAST(U ptr) {
-#if FW_DEBUG
+#if defined(FW_DEBUG)
     T p = dynamic_cast<T>(ptr);
     assert(p != nullptr);
     return p;

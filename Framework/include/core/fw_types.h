@@ -24,8 +24,8 @@
         typedef wchar_t             char_t; /**< 文字型 */
         typedef wchar_t *           str_t;  /**< 文字列型 */
     #elif FW_MBCS
-        typedef char                char_t; /**< 文字型 */
-        typedef char*               str_t;  /**< 文字列型 */
+        typedef unsigned char       char_t; /**< 文字型 */
+        typedef unsigned char *     str_t;  /**< 文字列型 */
     #else
         typedef char                char_t; /**< 文字型 */
         typedef char *              str_t;  /**< 文字列型 */
@@ -74,8 +74,8 @@
     #define FW_PLATFORM_ALIGN       FW_ALIGN16
 #endif
 
-#if FW_COMPILER_VS > 0
-    #if (FW_COMPILER_VS >= FW_COMPILER_VS2012)
+#if defined(FW_COMPILER_MSC)
+    #if (FW_COMPILER_MSC >= FW_COMPILER_VS2012)
         #define FW_OVERRIDE         override
         #define FW_FINAL            final
     #else

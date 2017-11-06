@@ -13,7 +13,7 @@ BEGIN_NAMESPACE_FW
 /**
  * @class DebugLogListner
  */
-class FW_EXPORT DebugLogListener {
+class FW_DLL DebugLogListener {
 public:
     /**
      * @brief 監視レベルマスクをセット
@@ -25,8 +25,6 @@ public:
      */
     FW_INLINE sint32_t GetLogLevelMask() const { return logLevelMask; }
 
-
-protected:
     /**
      * @brief 出力
      */
@@ -34,6 +32,14 @@ protected:
         return 0;
     }
     
+    /**
+     * @brief 内部バッファを全て書き出す
+     */
+    virtual void Flush() {
+    }
+
+
+protected:
     /**
      * @brief コンストラクタ
      */

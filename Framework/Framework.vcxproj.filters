@@ -21,6 +21,18 @@
     <Filter Include="header files\debug">
       <UniqueIdentifier>{2e15f862-d441-4a5f-b8b5-fc3e61d5a1eb}</UniqueIdentifier>
     </Filter>
+    <Filter Include="header files\container">
+      <UniqueIdentifier>{d9027434-8d85-445c-be33-2aa504af8287}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="header files\file">
+      <UniqueIdentifier>{2aae073d-ef8a-453b-844c-88ad56f7646b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="header files\misc">
+      <UniqueIdentifier>{a0666318-ab45-409c-b98a-4064d3f09ab3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="source files\file">
+      <UniqueIdentifier>{21936a83-9cd6-4d96-9496-9fd51a5c2f6d}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\framework.h">
@@ -38,11 +50,56 @@
     <ClInclude Include="include\debug\fw_debug_log_type.h">
       <Filter>header files\debug</Filter>
     </ClInclude>
-    <ClInclude Include="include\debug\fw_debug_log_stream.h">
-      <Filter>header files\debug</Filter>
-    </ClInclude>
     <ClInclude Include="source\precompiled.h">
       <Filter>header files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\core\fw_allocator.h">
+      <Filter>header files\core</Filter>
+    </ClInclude>
+    <ClInclude Include="include\debug\fw_debug_log_listener.h">
+      <Filter>header files\debug</Filter>
+    </ClInclude>
+    <ClInclude Include="include\debug\fw_assert.h">
+      <Filter>header files\debug</Filter>
+    </ClInclude>
+    <ClInclude Include="include\container\fw_array.h">
+      <Filter>header files\container</Filter>
+    </ClInclude>
+    <ClInclude Include="include\container\fw_container_allocator.h">
+      <Filter>header files\container</Filter>
+    </ClInclude>
+    <ClInclude Include="include\container\fw_deque.h">
+      <Filter>header files\container</Filter>
+    </ClInclude>
+    <ClInclude Include="include\container\fw_vector.h">
+      <Filter>header files\container</Filter>
+    </ClInclude>
+    <ClInclude Include="include\file\fw_path.h">
+      <Filter>header files\file</Filter>
+    </ClInclude>
+    <ClInclude Include="include\container\fw_string.h">
+      <Filter>header files\container</Filter>
+    </ClInclude>
+    <ClInclude Include="include\file\fw_file.h">
+      <Filter>header files\file</Filter>
+    </ClInclude>
+    <ClInclude Include="include\misc\fw_noncopyable.h">
+      <Filter>header files\misc</Filter>
+    </ClInclude>
+    <ClInclude Include="include\file\fw_file_manager.h">
+      <Filter>header files\file</Filter>
+    </ClInclude>
+    <ClInclude Include="include\core\fw_error.h">
+      <Filter>header files\core</Filter>
+    </ClInclude>
+    <ClInclude Include="include\file\fw_file_types.h">
+      <Filter>header files\file</Filter>
+    </ClInclude>
+    <ClInclude Include="include\core\fw_thread.h">
+      <Filter>header files\container</Filter>
+    </ClInclude>
+    <ClInclude Include="include\file\fw_file_stream.h">
+      <Filter>header files\file</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -51,6 +108,21 @@
     </ClCompile>
     <ClCompile Include="source\precompiled.cpp">
       <Filter>source files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\core\fw_allocator.cpp">
+      <Filter>source files\core</Filter>
+    </ClCompile>
+    <ClCompile Include="source\file\fw_path.cpp">
+      <Filter>source files\file</Filter>
+    </ClCompile>
+    <ClCompile Include="source\file\fw_file.cpp">
+      <Filter>source files\file</Filter>
+    </ClCompile>
+    <ClCompile Include="source\file\fw_file_manager.cpp">
+      <Filter>source files\file</Filter>
+    </ClCompile>
+    <ClCompile Include="source\core\fw_thread.cpp">
+      <Filter>source files\core</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

@@ -19,16 +19,36 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="include\container\fw_array.h" />
+    <ClInclude Include="include\container\fw_container_allocator.h" />
+    <ClInclude Include="include\container\fw_deque.h" />
+    <ClInclude Include="include\container\fw_string.h" />
+    <ClInclude Include="include\container\fw_vector.h" />
+    <ClInclude Include="include\core\fw_allocator.h" />
     <ClInclude Include="include\core\fw_define.h" />
+    <ClInclude Include="include\core\fw_error.h" />
+    <ClInclude Include="include\core\fw_thread.h" />
     <ClInclude Include="include\core\fw_types.h" />
+    <ClInclude Include="include\debug\fw_assert.h" />
     <ClInclude Include="include\debug\fw_debug_log.h" />
-    <ClInclude Include="include\debug\fw_debug_log_stream.h" />
+    <ClInclude Include="include\debug\fw_debug_log_listener.h" />
     <ClInclude Include="include\debug\fw_debug_log_type.h" />
+    <ClInclude Include="include\file\fw_file.h" />
+    <ClInclude Include="include\file\fw_file_manager.h" />
+    <ClInclude Include="include\file\fw_file_stream.h" />
+    <ClInclude Include="include\file\fw_file_types.h" />
+    <ClInclude Include="include\file\fw_path.h" />
     <ClInclude Include="include\framework.h" />
+    <ClInclude Include="include\misc\fw_noncopyable.h" />
     <ClInclude Include="source\precompiled.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="source\core\fw_allocator.cpp" />
+    <ClCompile Include="source\core\fw_thread.cpp" />
     <ClCompile Include="source\debug\fw_debug_log.cpp" />
+    <ClCompile Include="source\file\fw_file.cpp" />
+    <ClCompile Include="source\file\fw_file_manager.cpp" />
+    <ClCompile Include="source\file\fw_path.cpp" />
     <ClCompile Include="source\precompiled.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
@@ -89,15 +109,23 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <IncludePath>$(ProjectDir)include;$(ProjectDir)source;$(IncludePath)</IncludePath>
+    <IntDir>$(ProjectDir)obj\$(Platform)\$(Configuration)\</IntDir>
+    <OutDir>$(ProjectDir)bin\$(Platform)\$(Configuration)\</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <IncludePath>$(ProjectDir)include;$(ProjectDir)source;$(IncludePath)</IncludePath>
+    <IntDir>$(ProjectDir)obj\$(Platform)\$(Configuration)\</IntDir>
+    <OutDir>$(ProjectDir)bin\$(Platform)\$(Configuration)\</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <IncludePath>$(ProjectDir)include;$(ProjectDir)source;$(IncludePath)</IncludePath>
+    <IntDir>$(ProjectDir)obj\$(Platform)\$(Configuration)\</IntDir>
+    <OutDir>$(ProjectDir)bin\$(Platform)\$(Configuration)\</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <IncludePath>$(ProjectDir)include;$(ProjectDir)source;$(IncludePath)</IncludePath>
+    <IntDir>$(ProjectDir)obj\$(Platform)\$(Configuration)\</IntDir>
+    <OutDir>$(ProjectDir)bin\$(Platform)\$(Configuration)\</OutDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
@@ -106,8 +134,14 @@
       <SDLCheck>true</SDLCheck>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>precompiled.h</PrecompiledHeaderFile>
-      <PreprocessorDefinitions>WIN64;_WINDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>DLL_BUILD;WIN64;_WINDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
+    <PostBuildEvent>
+      <Command>mkdir $(SolutionDir)bin\$(Platform)\$(Configuration)\
+copy $(TargetPath) $(SolutionDir)bin\$(Platform)\$(Configuration)\
+copy $(TargetDir)$(TargetName).lib $(SolutionDir)bin\$(Platform)\$(Configuration)\
+copy $(TargetDir)$(TargetName).pdb $(SolutionDir)bin\$(Platform)\$(Configuration)\</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -116,8 +150,14 @@
       <SDLCheck>true</SDLCheck>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>precompiled.h</PrecompiledHeaderFile>
-      <PreprocessorDefinitions>WIN32;_WINDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>DLL_BUILD;WIN32;_WINDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
+    <PostBuildEvent>
+      <Command>mkdir $(SolutionDir)bin\$(Platform)\$(Configuration)\
+copy $(TargetPath) $(SolutionDir)bin\$(Platform)\$(Configuration)\
+copy $(TargetDir)$(TargetName).lib $(SolutionDir)bin\$(Platform)\$(Configuration)\
+copy $(TargetDir)$(TargetName).pdb $(SolutionDir)bin\$(Platform)\$(Configuration)\</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -128,12 +168,18 @@
       <SDLCheck>true</SDLCheck>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>precompiled.h</PrecompiledHeaderFile>
-      <PreprocessorDefinitions>WIN32;_WINDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>DLL_BUILD;WIN32;_WINDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
     </Link>
+    <PostBuildEvent>
+      <Command>mkdir $(SolutionDir)bin\$(Platform)\$(Configuration)\
+copy $(TargetPath) $(SolutionDir)bin\$(Platform)\$(Configuration)\
+copy $(TargetDir)$(TargetName).lib $(SolutionDir)bin\$(Platform)\$(Configuration)\
+copy $(TargetDir)$(TargetName).pdb $(SolutionDir)bin\$(Platform)\$(Configuration)\</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -144,12 +190,18 @@
       <SDLCheck>true</SDLCheck>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>precompiled.h</PrecompiledHeaderFile>
-      <PreprocessorDefinitions>WIN64;_WINDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>DLL_BUILD;WIN64;_WINDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
     </Link>
+    <PostBuildEvent>
+      <Command>mkdir $(SolutionDir)bin\$(Platform)\$(Configuration)\
+copy $(TargetPath) $(SolutionDir)bin\$(Platform)\$(Configuration)\
+copy $(TargetDir)$(TargetName).lib $(SolutionDir)bin\$(Platform)\$(Configuration)\
+copy $(TargetDir)$(TargetName).pdb $(SolutionDir)bin\$(Platform)\$(Configuration)\</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
