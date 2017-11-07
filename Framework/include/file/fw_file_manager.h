@@ -11,8 +11,8 @@
 
 BEGIN_NAMESPACE_FW
 
-class FileReadStream;
-class FileWriteStream;
+class FileStream;
+
 
 /**
  * @struct FileManagerDesc
@@ -38,31 +38,16 @@ public:
     /**
      * @brief ファイルを非同期で開く
      */
-    FW_INLINE FileReadStream * FileReadOpen(const str_t relativePath, const str_t fileName, const sint32_t options, const uint32_t priority = kFilePriorityNormal) {
+    FW_INLINE FileStream * FileStreamOpen(const str_t relativePath, const str_t fileName, const sint32_t options, const uint32_t priority = kFilePriorityNormal) {
         char_t tmpPath[Path::kMaxPathLen + 1];
-        return DoFileReadOpen(Path::Combine(tmpPath, ARRAY_SIZEOF(tmpPath), GetBasePath(), relativePath, fileName), options, priority);
-    }
-
-    /**
-     * @brief ファイルを非同期で開く
-     */
-    FW_INLINE FileWriteStream * FileWriteOpen(const str_t relativePath, const str_t fileName, const sint32_t options, const uint32_t priority = kFilePriorityNormal) {
-        char_t tmpPath[Path::kMaxPathLen + 1];
-        return DoFileWriteOpen(Path::Combine(tmpPath, ARRAY_SIZEOF(tmpPath), GetBasePath(), relativePath, fileName), options, priority);
+        return DoFileStreamOpen(Path::Combine(tmpPath, ARRAY_SIZEOF(tmpPath), GetBasePath(), relativePath, fileName), options, priority);
     }
 
     /**
      * @brief ファイルを開く
      */
-    FW_INLINE FileReadStream * FileReadOpen(const str_t fileName, const sint32_t options) {
-        return FileReadOpen(nullptr, fileName, options, kFilePriorityNormal);
-    }
-
-    /**
-     * @brief ファイルを開く
-     */
-    FW_INLINE FileWriteStream * FileWriteOpen(const str_t fileName, const sint32_t options) {
-        return FileWriteOpen(nullptr, fileName, options, kFilePriorityNormal);
+    FW_INLINE FileStream * FileStreamOpen(const str_t fileName, const sint32_t options) {
+        return FileStreamOpen(nullptr, fileName, options, kFilePriorityNormal);
     }
 
     /**
@@ -89,12 +74,7 @@ protected:
     /**
      * @brief ファイルを開く
      */
-    virtual FileReadStream * DoFileReadOpen(const str_t filePath, const sint32_t options, const uint32_t priority) = 0;
-
-    /**
-     * @brief ファイルを開く
-     */
-    virtual FileWriteStream * DoFileWriteOpen(const str_t filePath, const sint32_t options, const uint32_t priority) = 0;
+    virtual FileStream * DoFileStreamOpen(const str_t filePath, const sint32_t options, const uint32_t priority) = 0;
 
     /**
      * @brief 基準となるパスをセット

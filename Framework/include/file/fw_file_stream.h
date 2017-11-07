@@ -18,10 +18,24 @@ BEGIN_NAMESPACE_FW
 class FileStream : public NonCopyable<FileStream> {
 public:
     /**
-     * @brief ストリームを閉じる
+     * @brief ストリームを閉じて自身を破棄
      */
     FW_INLINE void Close() {
         DoClose();
+    }
+
+    /**
+     * @brief ファイルを読み込む
+     */
+    FW_INLINE sint32_t Read(void * dst, const sint64_t dstSize, const sint64_t readSize) {
+        return DoRead(dst, dstSize, readSize);
+    }
+
+    /**
+     * @brief ファイルへ書き込む
+     */
+    FW_INLINE sint32_t Write(const void * src, const sint64_t srcSize, const sint64_t writeSize) {
+        return DoWrite(src, srcSize, writeSize);
     }
 
     /**
@@ -48,8 +62,8 @@ public:
     /**
      * @brief 実行中の処理が完了するまで待つ
      */
-    FW_INLINE sint32_t Wait(const uint32_t milliseconds = FW_WAIT_INFINITE) {
-        return DoWait(milliseconds);
+    FW_INLINE sint32_t SubmitDone(const uint32_t milliseconds = FW_WAIT_INFINITE) {
+        return DoSubmitDone(milliseconds);
     }
 
     /**
@@ -74,6 +88,16 @@ protected:
     virtual void DoClose() = 0;
 
     /**
+     * @brief ファイルを読み込む
+     */
+    virtual sint32_t DoRead(void * dst, const sint64_t dstSize, const sint64_t readSize) = 0;
+
+    /**
+     * @brief ファイルへ書き込む
+     */
+    virtual sint32_t DoWrite(const void * src, const sint64_t srcSize, const sint64_t writeSize) = 0;
+
+    /**
      * @brief ファイルの長さを取得
      */
     virtual uint64_t DoLength() = 0;
@@ -91,10 +115,10 @@ protected:
     /**
      * @brief 実行中のジョブが完了するまで待つ
      */
-    virtual sint32_t DoWait(const uint32_t milliseconds) = 0;
+    virtual sint32_t DoSubmitDone(const uint32_t milliseconds) = 0;
 
 
-   /**
+    /**
      * @brief コンストラクタ
      */
     FileStream() {
@@ -111,86 +135,6 @@ protected:
 
     char_t      fileName[Path::kMaxFNameLen];
     sint32_t    errorCode;
-};
-
-/**
- * @class FileReadStream
- */
-class FileReadStream : public FileStream {
-public:
-    /**
-     * @brief ファイルを読み込む
-     */
-    FW_INLINE sint32_t Read(void * dst, const sint64_t dstSize, const sint64_t readSize) {
-        return DoRead(dst, dstSize, readSize);
-    }
-
-    /**
-     * @brief ファイルを読み込む
-     */
-    FW_INLINE void ReadAndSubmit(void * dst, const sint64_t dstSize, const sint64_t readSize) {
-        DoRead(dst, dstSize, readSize);
-        Submit();
-    }
-
-
-protected:
-    /**
-     * @brief ファイルを読み込む
-     */
-    virtual sint32_t DoRead(void * dst, const sint64_t dstSize, const sint64_t readSize) = 0;
-
-    /**
-     * @brief コンストラクタ
-     */
-    FileReadStream() {
-    }
-
-    /**
-     * @brief デストラクタ
-     */
-    virtual ~FileReadStream() {
-    }
-};
-
-/**
- * @class FileWriteStream
- */
-class FileWriteStream : public FileStream {
-public:
-    /**
-     * @brief ファイルへ書き込む
-     */
-    FW_INLINE sint32_t Write(const void * src, const sint64_t srcSize, const sint64_t writeSize) {
-        return DoWrite(src, srcSize, writeSize);
-    }
-    
-    /**
-     * @brief ファイルへ書き込む
-     */
-    FW_INLINE void WriteAndSubmit(const void * src, const sint64_t srcSize, const sint64_t writeSize) {
-        DoWrite(src, srcSize, writeSize);
-        Submit();
-    }
-
-
-protected:
-    /**
-     * @brief ファイルへ書き込む
-     */
-    virtual sint32_t DoWrite(const void * src, const sint64_t srcSize, const sint64_t writeSize) = 0;
-
-    /**
-     * @brief コンストラクタ
-     */
-    FileWriteStream() {
-    }
-
-    /**
-     * @brief デストラクタ
-     */
-    virtual ~FileWriteStream() {
-    }
 };
 
 END_NAMESPACE_FW
