@@ -34,12 +34,12 @@ sint32_t FileDelete(const str_t fileName);
 
 /**
  * @brief ファイルを読み込む
- * @param[in]  fp         ファイルディスクリプタ
- * @param[in]  dst        読み込み先バッファ
- * @param[in]  toReadSize 読み込みサイズ
- * @param[out] readSize   読み込まれたサイズを格納する変数へのポインタ
+ * @param[in]  fp           ファイルディスクリプタ
+ * @param[in]  dst          読み込み先バッファ
+ * @param[in]  toReadSize   読み込みサイズ
+ * @param[out] readSize     読み込まれたサイズを格納する変数へのポインタ
  */
-sint32_t FileRead(file_t & fp, void * dst, const sint64_t toReadSize, sint64_t * readSize);
+sint32_t FileRead(file_t & fp, void * dst, const uint64_t toReadSize, uint64_t * readSize);
 
 /**
  * @brief ファイルへ書き込む
@@ -48,7 +48,7 @@ sint32_t FileRead(file_t & fp, void * dst, const sint64_t toReadSize, sint64_t *
  * @param[in] toWriteSize 書き込みサイズ
  * @param[in] writeSize   書き込まれたサイズを格納する変数へのポインタ
  */
-sint32_t FileWrite(file_t & fp, const void * src, const sint64_t toWriteSize, sint64_t * writeSize);
+sint32_t FileWrite(file_t & fp, const void * src, const uint64_t toWriteSize, uint64_t * writeSize);
 
 /**
  * @brief ファイルのサイズを取得する

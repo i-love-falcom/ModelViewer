@@ -23,6 +23,13 @@ public:
     typedef const value_type &      const_reference;
     typedef pointer                 iterator;
 
+    array() {
+    }
+
+    array(const _My & ref) {
+        copy(*this, ref);
+    }
+
     size_type size() const {
         return _Num;
     }
@@ -108,10 +115,20 @@ public:
         return at(idx);
     }
 
-    
+    const array<_Ty, _Num> & operator =(const array<_Ty, _Num> & ref) {
+        copy(*this, ref);
+        return *this;
+    }
+
 private:
     bool check_range(size_type idx) {
         return (0 <= idx && idx < _Num);  
+    }
+
+    void copy(const _My & dst, const _My & src) {
+        for (size_type i = 0; i < size(); ++i) {
+            dst[i] = src[i];
+        }
     }
 
 
@@ -130,6 +147,13 @@ public:
     typedef const value_type *              const_pointer;
     typedef value_type &                    reference;
     typedef const value_type &              const_reference;
+
+    block_array() {
+    }
+
+    block_array(const _My & ref) {
+        copy(*this, ref);
+    }
 
     size_type size() const {
         return _Num;
@@ -208,10 +232,21 @@ public:
         return at(idx);
     }
 
-    
+    const array<_Ty, _Num> & operator =(const array<_Ty, _Num> & ref) {
+        copy(*this, ref);
+        return *this;
+    }
+
+
 private:
     bool check_range(size_type idx) {
         return (0 <= idx && idx < _Num);  
+    }
+
+    void copy(const _My & dst, const _My & src) {
+        for (size_type i = 0; i < size(); ++i) {
+            dst[i] = src[i];
+        }
     }
 
     reference ref(size_type idx) {

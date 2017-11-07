@@ -7,6 +7,9 @@
 #include "file/fw_file_stream.h"
 #include "file/fw_file.h"
 #include "core/fw_thread.h"
+#include "container/fw_deque.h"
+#include "container/fw_vector.h"
+
 
 BEGIN_NAMESPACE_FW
 BEGIN_NAMESPACE_NONAME
@@ -14,15 +17,24 @@ BEGIN_NAMESPACE_NONAME
 class FileReadStreamImpl;
 class FileWriteStreamImpl;
 
+/**
+ * @struct FileIONotification
+ */
+struct FileIONotification {
+    std::mutex                  mtx;
+    std::condition_variable     cv;
+    bool                        finished;
+};
 
 /**
  * @struct FileIOCommand
  */
 struct FileIOCommand {
     enum {
-        kFlagFileRead   = BIT32(0),
-        kFlagFileWrite  = BIT32(1),
-        kFlagFileSeek   = BIT32(2),
+        kFlagFileRead       = BIT32(0),
+        kFlagFileWrite      = BIT32(1),
+        kFlagFileSeek       = BIT32(2),
+        kFlagNotification   = BIT32(3),
     };
 
     file_t      fp;
@@ -32,8 +44,18 @@ struct FileIOCommand {
     sint64_t    seekOffset;
 
     void *      rwBuffer;
-    sint64_t    rwBufferSize;
-    sint64_t    rwSize;
+    uint64_t    rwSize;
+
+    FileIONotification * notification;
+};
+
+
+/**
+ * @struct FileIOSharedBuffer
+ */
+struct FileIOSharedBuffer {
+    deque<FileIOCommand>    commandQueue;
+    std::mutex              commandQueueMutex;
 };
 
 /**
@@ -41,13 +63,51 @@ struct FileIOCommand {
  */
 class FileIOThread : public Thread {
 public:
+    FileIOSharedBuffer *    sharedBuffer;
+
+
     virtual sint32_t Invoke(void * userArgs) FW_OVERRIDE {
         
         while (true) {
-            //! @todo キューからコマンドを取得
-            //! @todo コマンドの内容に従って処理を実行
+            FileIOCommand cmd;
+            
+            // キューからコマンドを取得
+            bool foundNewCommand = false;
+            if (!sharedBuffer->commandQueue.empty()) {
+                std::lock_guard<std::mutex> lock(sharedBuffer->commandQueueMutex);
+                if (!sharedBuffer->commandQueue.empty()) {
+                    cmd = sharedBuffer->commandQueue.front();
+                    sharedBuffer->commandQueue.pop_front();
+                    foundNewCommand = true;
+                }
+            }
+            if (!foundNewCommand) {
+                break;
+            }
 
-            //! @todo 終了判定
+            // 読み込み／書き込み位置を移動
+            if ((cmd.flags & FileIOCommand::kFlagFileSeek) != 0) {
+                sint32_t result = FileSeek(cmd.fp, cmd.seekOffset, cmd.seekOrigin);
+                assert(result != FW_OK);
+            }
+
+            // ファイルアクセス
+            if ((cmd.flags & FileIOCommand::kFlagFileRead) != 0) {
+                sint32_t result = FileRead(cmd.fp, cmd.rwBuffer, cmd.rwSize, nullptr);
+                assert(result == FW_OK);
+            } else if ((cmd.flags & FileIOCommand::kFlagFileWrite) != 0) {
+                sint32_t result = FileWrite(cmd.fp, cmd.rwBuffer, cmd.rwSize, nullptr);
+                assert(result == FW_OK);
+            }
+
+            // 終了通知
+            if ((cmd.flags & FileIOCommand::kFlagNotification) != 0) {
+                {
+                    std::lock_guard<std::mutex> lock(cmd.notification->mtx);
+                    cmd.notification->finished = true;
+                }
+                cmd.notification->cv.notify_all();
+            }
         }
 
         return 0;
@@ -68,6 +128,7 @@ public:
         threadDesc.userArgs = nullptr; //! @todo
         string::Copy(threadDesc.name, ARRAY_SIZEOF(threadDesc.name), _T("FileIO Thread"));
 
+        fileIOThread.sharedBuffer = &this->sharedBuffer;
         fileIOThread.StartWorker(&threadDesc);
     }
 
@@ -102,8 +163,10 @@ public:
 
 
 private:
-    char_t          basePath[Path::kMaxPathLen + 1];
-    FileIOThread    fileIOThread;
+    char_t  basePath[Path::kMaxPathLen + 1];
+
+    FileIOSharedBuffer  sharedBuffer;
+    FileIOThread        fileIOThread;
 };
 
 /**
@@ -118,6 +181,10 @@ public:
     sint64_t    seekOffset;
     SeekOrigin  seekOrigin;
     bool        updateFileSeek;
+
+    FileIOSharedBuffer *        sharedBuffer;
+    vector<FileIOCommand>       localBuffer;
+    FileIONotification          finishNotification;
 
 
     // ファイルを閉じる
@@ -146,13 +213,13 @@ public:
 
     // ファイルを読み込む
     virtual sint32_t DoRead(void * dst, const sint64_t dstSize, const sint64_t readSize) FW_OVERRIDE {
-        FileIOCommand cmd;
+        FileIOCommand & cmd = localBuffer.append();
         cmd.fp              = fileHandle;
         cmd.flags           = FileIOCommand::kFlagFileRead;
+        cmd.priority        = priority;
         cmd.seekOrigin      = seekOrigin;
         cmd.seekOffset      = seekOffset;
         cmd.rwBuffer        = dst;
-        cmd.rwBufferSize    = dstSize;
         cmd.rwSize          = readSize;
 
         if (updateFileSeek) {
@@ -160,18 +227,37 @@ public:
             updateFileSeek = false;
         }
 
-        //! @todo キューに積む
-
         return FW_OK;
     }
 
     // 処理を送出する
     virtual void DoSubmit() FW_OVERRIDE {
+        auto & cmd = localBuffer.back();
+        cmd.flags |= FileIOCommand::kFlagNotification;
+        cmd.notification = &finishNotification;
 
+        {
+            // 共有バッファのキューにコマンドを積む
+            std::lock_guard<std::mutex> lock(sharedBuffer->commandQueueMutex);
+
+            // 優先度でソート
+            auto itr = std::lower_bound(sharedBuffer->commandQueue.begin(), sharedBuffer->commandQueue.end(),
+                localBuffer.front(), [](const FileIOCommand & a, const FileIOCommand & b) { return a.priority - b.priority; });
+
+            // 見つかった位置に全て挿入
+            sharedBuffer->commandQueue.insert(itr, localBuffer.begin(), localBuffer.end());
+        }
+
+        // 送ったので消しておく
+        localBuffer.clear();
     }
 
     // 実行中の処理が完了するまで待つ
     virtual sint32_t DoWait(const uint32_t milliseconds) FW_OVERRIDE {
+        {
+            std::unique_lock<std::mutex> lock(finishNotification.mtx);
+            finishNotification.cv.wait(lock, [this]() { return finishNotification.finished; });
+        }
         return FW_OK;
     }
 
@@ -195,6 +281,10 @@ public:
     sint64_t    seekOffset;
     SeekOrigin  seekOrigin;
     bool        updateFileSeek;
+
+    FileIOSharedBuffer *        sharedBuffer;
+    vector<FileIOCommand>       localBuffer;
+    FileIONotification          finishNotification;
 
 
     // ファイルを閉じる
@@ -225,7 +315,6 @@ public:
         cmd.seekOrigin      = seekOrigin;
         cmd.seekOffset      = seekOffset;
         cmd.rwBuffer        = const_cast<void *>(src);
-        cmd.rwBufferSize    = srcSize;
         cmd.rwSize          = writeSize;
 
         if (updateFileSeek) {
@@ -233,18 +322,37 @@ public:
             updateFileSeek = false;
         }
 
-        //! @todo キューに積む
-
         return FW_OK;
     }
 
     // 処理を送出する
     virtual void DoSubmit() FW_OVERRIDE {
+        auto & cmd = localBuffer.back();
+        cmd.flags |= FileIOCommand::kFlagNotification;
+        cmd.notification = &finishNotification;
 
+        {
+            // 共有バッファのキューにコマンドを積む
+            std::lock_guard<std::mutex> lock(sharedBuffer->commandQueueMutex);
+
+            // 優先度でソート
+            auto itr = std::lower_bound(sharedBuffer->commandQueue.begin(), sharedBuffer->commandQueue.end(),
+                localBuffer.front(), [](const FileIOCommand & a, const FileIOCommand & b) { return a.priority - b.priority; });
+
+            // 見つかった位置に全て挿入
+            sharedBuffer->commandQueue.insert(itr, localBuffer.begin(), localBuffer.end());
+        }
+
+        // 送ったので消しておく
+        localBuffer.clear();
     }
 
     // 実行中のジョブが完了するまで待つ
     virtual sint32_t DoWait(const uint32_t milliseconds) FW_OVERRIDE {
+        {
+            std::unique_lock<std::mutex> lock(finishNotification.mtx);
+            finishNotification.cv.wait(lock, [this]() { return finishNotification.finished; });
+        }
         return FW_OK;
     }
 

@@ -5,13 +5,6 @@
 #include "precompiled.h"
 #include "core/fw_thread.h"
 
-#include <exception>
-#include <stdexcept>
-#include <thread>
-#include <mutex>
-#include <condition_variable>
-
-
 BEGIN_NAMESPACE_FW
 BEGIN_NAMESPACE_NONAME
 /**

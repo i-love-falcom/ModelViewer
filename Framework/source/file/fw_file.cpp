@@ -116,37 +116,59 @@ sint32_t FileDelete(const str_t name) {
     return FW_OK;
 }
 
-sint32_t FileRead(file_t & fp, void * dst, const sint64_t toReadSize, sint64_t * readSize) {
-    if (fp.fileHandle == nullptr || dst == nullptr || toReadSize <= 0) {
+sint32_t FileRead(file_t & fp, void * dst, const uint64_t toReadSize, uint64_t * readSize) {
+    if (fp.fileHandle == nullptr || dst == nullptr || toReadSize == 0) {
         return ERR_INVALID_PARMS;
     }
     
-    DWORD numReads = 0;
-    BOOL r = ReadFile(fp.fileHandle, dst, static_cast<DWORD>(toReadSize), &numReads, NULL);
-    if (!r) {
-        return ERR_INVALID;
+    uint64_t readOffset = 0;
+    while (true) {
+        void * dstBuffer = reinterpret_cast<void *>(reinterpret_cast<uintptr_t>(dst) + readOffset);
+        DWORD readSize = static_cast<DWORD>((toReadSize - readOffset) & 0xffffffff);
+
+        DWORD numReads = 0;
+        BOOL r = ReadFile(fp.fileHandle, dstBuffer, readSize, &numReads, NULL);
+        if (!r) {
+            return ERR_INVALID;
+        }
+
+        readOffset += static_cast<uint64_t>(numReads);
+        if (readOffset >= toReadSize) {
+            break;
+        }
     }
     if (readSize != nullptr) {
-        *readSize = static_cast<sint64_t>(numReads);
+        *readSize = static_cast<uint64_t>(readOffset);
     }
-    if (numReads == 0) {
+    if (readOffset == 0) {
         return ERR_EOF;
     }
     return FW_OK;
 }
 
-sint32_t FileWrite(file_t & fp, const void * src, const sint64_t toWriteSize, sint64_t * writeSize) {
-    if (fp.fileHandle == nullptr || src == nullptr || toWriteSize <= 0) {
+sint32_t FileWrite(file_t & fp, const void * src, const uint64_t toWriteSize, uint64_t * writeSize) {
+    if (fp.fileHandle == nullptr || src == nullptr || toWriteSize == 0) {
         return ERR_INVALID_PARMS;
     }
     
-    DWORD numWrites = 0;
-    BOOL r = WriteFile(fp.fileHandle, src, static_cast<DWORD>(toWriteSize), &numWrites, NULL);
-    if (!r) {
-        return ERR_INVALID;
+    uint64_t writeOffset = 0;
+    while (true) {
+        const void * srcBuffer = reinterpret_cast<const void *>(reinterpret_cast<uintptr_t>(src) + writeOffset);
+        DWORD writeSize = static_cast<DWORD>((toWriteSize - writeOffset) & 0xffffffff);
+
+        DWORD numWrites = 0;
+        BOOL r = WriteFile(fp.fileHandle, srcBuffer, writeSize, &numWrites, NULL);
+        if (!r) {
+            return ERR_INVALID;
+        }
+
+        writeOffset += static_cast<uint64_t>(numWrites);
+        if (writeOffset >= toWriteSize) {
+            break;
+        }
     }
     if (writeSize != nullptr) {
-        *writeSize = static_cast<sint64_t>(numWrites);
+        *writeSize = static_cast<uint64_t>(writeOffset);
     }
     return FW_OK;
 }
