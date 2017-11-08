@@ -73,13 +73,6 @@ public:
         return fileName;
     }
 
-    /**
-     * @brief エラーコードを取得
-     */
-    FW_INLINE sint32_t GetError() {
-        return errorCode;
-    }
-
 
 protected:
     /**
@@ -123,7 +116,6 @@ protected:
      */
     FileStream() {
         fileName[0] = _T('\0');
-        errorCode = FW_OK;
     }
 
     /**
@@ -133,8 +125,7 @@ protected:
     }
 
 
-    char_t      fileName[Path::kMaxFNameLen];
-    sint32_t    errorCode;
+    char_t  fileName[Path::kMaxFNameLen];
 };
 
 END_NAMESPACE_FW
