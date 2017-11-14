@@ -58,13 +58,20 @@ static void * fwDefaultMallocFunc(size_t size, uint64_t attribute, const char * 
 }
 
 static void fwDefaultFreeFunc(void * ptr) {
-    // ヘッダ、フッタ
-    fwMemBlockHeader * header = reinterpret_cast<fwMemBlockHeader *>(reinterpret_cast<uintptr_t>(ptr) - sizeof(fwMemBlockHeader));
-    fwMemBlockFooter * footer = reinterpret_cast<fwMemBlockFooter *>(reinterpret_cast<uintptr_t>(ptr) + header->blockSize);
-    
-    
+    if (ptr == nullptr) {
+        return;
+    }
 
-    return _aligned_free(ptr);
+    // ヘッダ
+    fwMemBlockHeader * header = reinterpret_cast<fwMemBlockHeader *>(reinterpret_cast<uintptr_t>(ptr) - sizeof(fwMemBlockHeader));
+    assert(header->marker == s_memBlockMarker);
+
+    // フッタ
+    fwMemBlockFooter * footer = reinterpret_cast<fwMemBlockFooter *>(reinterpret_cast<uintptr_t>(ptr) + header->blockSize);
+    assert(footer->marker == s_memBlockMarker);
+    
+    void * origin = reinterpret_cast<void *>(reinterpret_cast<uintptr_t>(ptr) - header->offsetBytes);
+    return _free_dbg(origin, _NORMAL_BLOCK);
 }
 
 

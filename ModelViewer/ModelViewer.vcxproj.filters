@@ -9,19 +9,25 @@
       <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
       <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
     </Filter>
+    <Filter Include="source files\sys">
+      <UniqueIdentifier>{aabbfc7c-cdc5-4076-8e7f-26cc5c5eddac}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="source\ModelViewer.cpp">
-      <Filter>source files</Filter>
-    </ClCompile>
     <ClCompile Include="source\stdafx.cpp">
       <Filter>source files</Filter>
     </ClCompile>
+    <ClCompile Include="source\sys\app.cpp">
+      <Filter>source files\sys</Filter>
+    </ClCompile>
+    <ClCompile Include="source\sys\app_wndproc.cpp">
+      <Filter>source files\sys</Filter>
+    </ClCompile>
+    <ClCompile Include="source\sys\main.cpp">
+      <Filter>source files\sys</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="source\ModelViewer.h">
-      <Filter>source files</Filter>
-    </ClInclude>
     <ClInclude Include="source\stdafx.h">
       <Filter>source files</Filter>
     </ClInclude>
@@ -29,7 +35,16 @@
       <Filter>source files</Filter>
     </ClInclude>
     <ClInclude Include="resource\Resource.h">
-      <Filter>source files</Filter>
+      <Filter>resource files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\sys\app.h">
+      <Filter>source files\sys</Filter>
+    </ClInclude>
+    <ClInclude Include="source\sys\app_wndproc.h">
+      <Filter>source files\sys</Filter>
+    </ClInclude>
+    <ClInclude Include="source\sys\main.h">
+      <Filter>source files\sys</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

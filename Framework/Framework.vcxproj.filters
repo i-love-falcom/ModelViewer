@@ -124,5 +124,8 @@
     <ClCompile Include="source\core\fw_thread.cpp">
       <Filter>source files\core</Filter>
     </ClCompile>
+    <ClCompile Include="source\framework.cpp">
+      <Filter>source files</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>
