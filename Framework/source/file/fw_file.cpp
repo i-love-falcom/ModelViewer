@@ -95,14 +95,14 @@ sint32_t FileClose(file_t & fp) {
     if (fp.fileHandle == nullptr) {
         return ERR_INVALID_PARMS;
     }
+    if ((fp.options & kFileOptFlagNoClose) == 0) {
+        HANDLE hFile = fp.fileHandle;
 
-    HANDLE hFile = fp.fileHandle;
-    
-    fp.fileHandle = nullptr;
-    fp.options = 0;
-    
-    CloseHandle(hFile);
-    
+        fp.fileHandle = nullptr;
+        fp.options = 0;
+
+        CloseHandle(hFile);
+    }
     return FW_OK;
 }
 
@@ -246,6 +246,26 @@ sint32_t FlushFileBuffer(file_t & fp) {
     FlushFileBuffers(fp.fileHandle);
     
     return 0;
+}
+
+file_t GetStdFileHandle(const StdDeviceHandle handle) {
+    file_t fp;
+    fp.options |= kFileOptFlagNoClose;
+
+#if defined(FW_PLATFORM_WIN32)
+    switch (handle) {
+    case kStdInputDeviceHandle:    fp.fileHandle = GetStdHandle(STD_INPUT_HANDLE); break;
+    case kStdOutputDeviceHandle:   fp.fileHandle = GetStdHandle(STD_OUTPUT_HANDLE); break;
+    case kStdErrorDeviceHandle:    fp.fileHandle = GetStdHandle(STD_ERROR_HANDLE); break;
+    }
+#else
+    switch (handle) {
+    case kStdInputDeviceHandle:    fp.fileHandle = stdin; break;
+    case kStdOutputDeviceHandle:   fp.fileHandle = stdout; break;
+    case kStdErrorDeviceHandle:    fp.fileHandle = stderr; break;
+    }
+#endif
+    return fp;
 }
 
 END_NAMESPACE_FW

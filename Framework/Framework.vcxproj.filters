@@ -101,6 +101,9 @@
     <ClInclude Include="include\file\fw_file_stream.h">
       <Filter>header files\file</Filter>
     </ClInclude>
+    <ClInclude Include="include\misc\fw_fsm.h">
+      <Filter>header files\misc</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="source\debug\fw_debug_log.cpp">

@@ -6,7 +6,42 @@
 #include "../resource/resource.h"
 #include "sys/app.h"
 #include "sys/app_wndproc.h"
+#include "main_thread.h"
 
+USING_NAMESPACE_FW
+
+
+BEGIN_NAMESPACE_NONAME
+static const str_t  s_debugLogLevelString[kDebugLogLevelCount] = {
+    _T("FatalError"),
+    _T("Error"),
+    _T("Warning"),
+    _T("Info"),
+    _T("Debug"),
+};
+
+/**
+ * @internal
+ * @class DefaultDebugLogListener
+ */
+class DefaultDebugLogListener : public DebugLogListener {
+public:
+    virtual sint32_t ReceiveDebugLog(const DebugLogLevel level, const str_t msg) FW_OVERRIDE {
+        char_t log[DebugLog::kMaxLogLen + 1];
+        tstring::SPrintf(log, ARRAY_SIZEOF(log), _T("%s : %s"), s_debugLogLevelString[level], msg);
+
+#if defined(FW_PLATFORM_WIN32)
+        ::OutputDebugString(log);
+#else
+        uint64_t writeSize = tstring::Length(log) * sizeof(char_t);
+        FileWrite(GetStdFileHandle(kStdOutputDeviceHandle), log, writeSize, nullptr);
+#endif
+        return 0;
+    }
+};
+
+static DefaultDebugLogListener  s_debugLogListener;
+END_NAMESPACE_NONAME
 
 
 App::App()
@@ -24,6 +59,9 @@ App & App::Instance() {
 }
 
 void App::Initialize(AppParms & parms, CommandLineArgs & args) {
+    // デバッグログリスナ登録
+    DebugLog::RegisterDebugLogListener(&s_debugLogListener);
+    
 #if defined(FW_PLATFORM_WIN32)
     hInstance       = parms.hInstance;
     hPrevInstance   = parms.hPrevInstance;
@@ -68,31 +106,10 @@ void App::Shutdown() {
 #endif
 }
 
-BEGIN_NAMESPACE_NONAME
-/**
- * @internal
- * @class DefaultDebugLogListener
- */
-class DefaultDebugLogListener : public NAMESPACE_FW DebugLogListener {
-public:
-    virtual sint32_t ReceiveDebugLog(const DebugLogLevel level, const str_t msg) FW_OVERRIDE {
-#if defined(FW_PLATFORM_WIN32)
-        ::OutputDebugString(msg);
-#else
-        fprintf(stderr, msg);
-#endif
-        return 0;
-    }
-};
-
-static DefaultDebugLogListener  s_debugLogListener;
-END_NAMESPACE_NONAME
 
 int App::Run() {
-    // デバッグログリスナ登録
-    NAMESPACE_FW DebugLog::RegisterDebugLogListener(&s_debugLogListener);
-    
-    //! @todo メインスレッド生成
+    MainThread mainThread;
+    mainThread.StartMainThread(_T("ModelViewerMain"));
 
     MSG msg;
     while (GetMessage(&msg, nullptr, 0, 0)) {
@@ -100,27 +117,29 @@ int App::Run() {
         DispatchMessage(&msg);
     }
 
+    mainThread.TerminateMainThread();
+
     return (int)msg.wParam;
 }
 
 void App::OnSuspend(void * args) {
-    NAMESPACE_FW DebugLog::Info(_T("OnSuspend\n"));
+    DebugLog::Info(_T("OnSuspend\n"));
 }
 
 void App::OnResume(void * args) {
-    NAMESPACE_FW DebugLog::Info(_T("OnResume\n"));
+    DebugLog::Info(_T("OnResume\n"));
 }
 
 #if defined(FW_PLATFORM_WIN32)
 void App::OnDropFiles(DropFileArgs * args) {
-    NAMESPACE_FW DebugLog::Info(_T("OnDropFiles\n"));
+    DebugLog::Info(_T("OnDropFiles\n"));
 }
 
 void App::OnSetFocus(void * args) {
-    NAMESPACE_FW DebugLog::Info(_T("OnSetFocus\n"));
+    DebugLog::Info(_T("OnSetFocus\n"));
 }
 
 void App::OnKillFocus(void * args) {
-    NAMESPACE_FW DebugLog::Info(_T("OnKillFocus\n"));
+    DebugLog::Info(_T("OnKillFocus\n"));
 }
 #endif

@@ -26,6 +26,9 @@
     <ClCompile Include="source\sys\main.cpp">
       <Filter>source files\sys</Filter>
     </ClCompile>
+    <ClCompile Include="source\main_thread.cpp">
+      <Filter>source files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="source\stdafx.h">
@@ -45,6 +48,9 @@
     </ClInclude>
     <ClInclude Include="source\sys\main.h">
       <Filter>source files\sys</Filter>
+    </ClInclude>
+    <ClInclude Include="source\main_thread.h">
+      <Filter>source files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

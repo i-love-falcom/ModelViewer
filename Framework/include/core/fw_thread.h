@@ -40,11 +40,11 @@ enum threadPriority_t {
     kThreadPriorityMin          = 256,
     kThreadPriorityMax          = 1024,
     
-    kTheadPriorityLowest        = (kThreadPriorityMax - kThreadPriorityMin) * 0 / 4 + kThreadPriorityMin,    ///< 最低の優先度
-    kTheadPriorityBelowNormal   = (kThreadPriorityMax - kThreadPriorityMin) * 1 / 4 + kThreadPriorityMin,    ///< 基準より一段低い優先度
-    kTheadPriorityNormal        = (kThreadPriorityMax - kThreadPriorityMin) * 2 / 4 + kThreadPriorityMin,    ///< 基準となる優先度
-    kTheadPriorityAboveNormal   = (kThreadPriorityMax - kThreadPriorityMin) * 3 / 4 + kThreadPriorityMin,    ///< 基準より一段高い優先度
-    kTheadPriorityHighest       = (kThreadPriorityMax - kThreadPriorityMin) * 4 / 4 + kThreadPriorityMin,    ///< 最高の優先度
+    kTheadPriorityLowest        = (kThreadPriorityMax - kThreadPriorityMin) * 1 / 6 + kThreadPriorityMin,    ///< 最低の優先度
+    kTheadPriorityBelowNormal   = (kThreadPriorityMax - kThreadPriorityMin) * 2 / 6 + kThreadPriorityMin,    ///< 基準より一段低い優先度
+    kTheadPriorityNormal        = (kThreadPriorityMax - kThreadPriorityMin) * 3 / 6 + kThreadPriorityMin,    ///< 基準となる優先度
+    kTheadPriorityAboveNormal   = (kThreadPriorityMax - kThreadPriorityMin) * 4 / 6 + kThreadPriorityMin,    ///< 基準より一段高い優先度
+    kTheadPriorityHighest       = (kThreadPriorityMax - kThreadPriorityMin) * 5 / 6 + kThreadPriorityMin,    ///< 最高の優先度
 #endif
 };
 

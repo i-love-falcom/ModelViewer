@@ -25,6 +25,8 @@ enum FileOptionBits {
     kFileOptFlagRandomAccessShiftBits,
     kFileOptFlagSequentialShiftBits,
     kFileOptFlagDeleteOnCloseShiftBits,
+
+    kFileOptFlagNoCloseShiftBits,
 };
 
 /**
@@ -51,6 +53,8 @@ enum FileOptions {
     kFileOptFlagSequential      = BIT32(kFileOptFlagSequentialShiftBits),       ///< シーケンシャルアクセスに最適化
     kFileOptFlagDeleteOnClose   = BIT32(kFileOptFlagDeleteOnCloseShiftBits),    ///< ファイルクローズ時に自動的に削除
     kFileOptFlagMask            = (kFileOptFlagRandomAccess | kFileOptFlagSequential | kFileOptFlagDeleteOnClose),    ///< フラグマスク
+
+    kFileOptFlagNoClose         = BIT32(kFileOptFlagNoCloseShiftBits),          ///< ファイルクローズしない
 };
 
 /**
@@ -79,6 +83,16 @@ enum FilePriority {
 };
 
 /**
+ * @enum StdFileHandle
+ */
+enum StdDeviceHandle {
+    kStdInputDeviceHandle,      ///< 標準入力ハンドル
+    kStdOutputDeviceHandle,     ///< 標準出力ハンドル
+    kStdErrorDeviceHandle,      ///< 標準エラーハンドル
+};
+
+
+/**
  * @struct file_t
  * @brief ファイルディスクリプタ
  */
@@ -91,17 +105,17 @@ struct FW_DLL file_t {
     sint32_t    options;
 
 
-    const file_t & operator =(const file_t ref) {
-        this->fileHandle = ref.fileHandle;
-        this->options = ref.options;
+//    const file_t & operator =(const file_t ref) {
+//        this->fileHandle = ref.fileHandle;
+//        this->options = ref.options;
+//
+//        return *this;
+//    }
 
-        return *this;
-    }
-
-    file_t()
-    : fileHandle(nullptr)
-    , options(0) {
-    }
+//    file_t()
+//    : fileHandle(nullptr)
+//    , options(0) {
+//    }
 };
 
 
