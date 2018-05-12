@@ -5,29 +5,49 @@
 #ifndef FW_THREAD_H_
 #define FW_THREAD_H_
 
-BEGIN_NAMESPACE_FW
-struct ThreadInfo;
+#define FW_THREAD_UNKNOWN       (0)
+#define FW_THREAD_STL           (1)
+#define FW_THREAD_WIN32         (2)
 
 #if defined(FW_PLATFORM_WIN32)
-typedef uintptr_t                   threadId_t;
-typedef uintptr_t                   threadHandle_t;
+    #if FW_BUILD_CONFIG_FORCE_USE_STD_THREAD
+    #define FW_THREAD           FW_THREAD_STL
+    #else
+    #define FW_THREAD           FW_THREAD_WIN32
+    #endif
 #else
-typedef std::thread::id             threadId_t;
-typedef std::therad::native_handle  threadHandle_t;
+#define FW_THREAD               FW_THREAD_STL
 #endif
-typedef uint64_t                    threadAffinity_t;
 
-static const size_t             MaxThreadNameLen = 255;
-static const uint32_t           DefaultThreadFlags = 0;
-static const uint32_t           DefaultThreadStackSize = 128 * 1024;
-static const threadAffinity_t   DefaultThreadAffinity = static_cast<threadAffinity_t>(0xffffffffffffffff);
+#if FW_THREAD == FW_THREAD_STL
+#include <thread>
+#elif FW_THREAD == FW_THREAD_UNKNOWN
+#error unsupported platform
+#endif
+
+BEGIN_NAMESPACE_FW
+class FwThreadInfo;
+
+#if FW_THREAD == FW_THREAD_WIN32
+using FwThreadId        = uintptr_t;
+using FwThreadHandle    = uintptr_t;
+#elif FW_THREAD == FW_THREAD_STL
+using FwThreadId        = std::thread::id;
+using FwThreadHandle    = std::thread::native_handle_type;
+#endif
+using FwThreadAffinity = uint64_t;
+
+static const size_t             FwMaxThreadNameLen          = 255;
+static const uint32_t           DefaultFwThreadFlags        = 0;
+static const uint32_t           DefaultFwThreadStackSize    = 128 * 1024;
+static const FwThreadAffinity   DefaultFwThreadAffinity     = static_cast<FwThreadAffinity>(0xffffffffffffffff);
 
 
 /**
  * @enum threadPriority_t
  */
-enum threadPriority_t {
-#if defined(FW_PLATFORM_WIN32)
+enum FwThreadPriority : sint32_t {
+#if FW_THREAD == FW_THREAD_WIN32
     kThreadPriorityMin          = THREAD_BASE_PRIORITY_IDLE,
     kThreadPriorityMax          = THREAD_PRIORITY_TIME_CRITICAL,
     
@@ -36,7 +56,7 @@ enum threadPriority_t {
     kTheadPriorityNormal        = THREAD_PRIORITY_NORMAL,           ///< 基準となる優先度
     kTheadPriorityAboveNormal   = THREAD_PRIORITY_ABOVE_NORMAL,     ///< 基準より一段高い優先度
     kTheadPriorityHighest       = THREAD_PRIORITY_HIGHEST,          ///< 最高の優先度
-#else
+#elif FW_THREAD == FW_THREAD_STL
     kThreadPriorityMin          = 256,
     kThreadPriorityMax          = 1024,
     
@@ -51,39 +71,52 @@ enum threadPriority_t {
 /**
  * @struct ThreadDesc
  */
-class ThreadDesc {
+class FwThreadDesc {
 public:
     void *              userArgs;
     uint32_t            flags;
     uint32_t            stackSize;
     sint32_t            priority;
-    threadAffinity_t    affinity;
-    char_t              name[MaxThreadNameLen + 1];
+    FwThreadAffinity    affinity;
+    char_t              name[FwMaxThreadNameLen + 1];
 
     /**
      * @brief 初期化
      */
     void Init() {
-        userArgs = nullptr;
-        flags = DefaultThreadFlags;
-        stackSize = DefaultThreadStackSize;
-        priority = kTheadPriorityNormal;
-        affinity = DefaultThreadAffinity;
-        name[0] = _T('\0');
+        userArgs    = nullptr;
+        flags       = DefaultFwThreadFlags;
+        stackSize   = DefaultFwThreadStackSize;
+        priority    = FwThreadPriority::kTheadPriorityNormal;
+        affinity    = DefaultFwThreadAffinity;
+        name[0]     = _T('\0');
     }
 };
 
 /**
- * @class Thread
+ * @class FwThread
  */
-class FW_DLL Thread {
+class FW_DLL FwThread {
 public:
+    /**
+     * @brief スレッドオブジェクトの初期化処理
+     * @param[in] userArgs 任意のパラメータ
+     */
+    virtual void InitializeThreadFunc(void * userArgs) {}
+
     /**
      * @brief スレッドオブジェクトのエントリポイント
      * @param[in] userArgs 任意のパラメータ
      * @return 終了コード
      */
-    virtual sint32_t Invoke(void * userArgs) = 0;
+    virtual sint32_t ThreadFunc(void * userArgs) = 0;
+
+    /**
+     * @brief スレッドオブジェクトの終了処理
+     * @param[in] returnValue ThreadFuncで返した終了コード
+     * @param[in] userArgs    任意のパラメータ
+     */
+    virtual void ShutdownThreadFunc(const sint32_t returnValue, void * userArgs) {}
 
     /**
      * @brief 終了処理
@@ -94,13 +127,13 @@ public:
      * @brief スレッドを開始する
      * @param[in] ThreadDesc スレッド詳細
      */
-    void Start(const ThreadDesc * desc);
+    void Start(const FwThreadDesc * desc);
     
     /**
      * @brief ワーカースレッドを開始する
      * @param[in] ThreadDesc スレッド詳細
      */
-    void StartWorker(const ThreadDesc * desc);
+    void StartWorker(const FwThreadDesc * desc);
     
     /**
      * @brief スレッドを終了してリソースを解放する
@@ -108,9 +141,9 @@ public:
     void TerminateThread();
     
     /**
-     * @brief ワーカースレッドを起こす
+     * @brief ワーカースレッドを起こして再実行する
      */
-    void RaiseWorkerThread();
+    void RestartThread();
     
     /**
      * @brief スレッド処理の終了を待つ
@@ -125,35 +158,29 @@ public:
     /**
      * @brief スレッドIDを取得
      */
-    FW_INLINE threadId_t GetThreadId() const { return threadId; }
+    FwThreadId GetThreadId() const;
 
     /**
      * @brief スレッドハンドルを取得
      */
-    FW_INLINE threadHandle_t GetThreadHandle() const { return threadHandle; }
+    FwThreadHandle GetThreadHandle();
 
     /**
      * @brief ThreadDescを取得
      */
-    FW_INLINE const ThreadDesc & GetDesc() const { return desc; }
+    FW_INLINE const FwThreadDesc & GetDesc() const { return desc; }
 
     /**
      * @brief ThreadInfoを取得
      * @memo 内部使用
      */
-    FW_INLINE ThreadInfo * GetThreadInfo() const { return threadInfo; }
+    FW_INLINE FwThreadInfo * GetThreadInfo() const { return threadInfo; }
 
     /**
      * @brief 現在のスレッドIDを取得
      */
-    static threadId_t GetCurrentThreadId();
+    static FwThreadId GetCurrentThreadId();
 
-    /**
-     * @brief 現在のスレッドを終了する
-     * @param[in] exitCode 終了コード
-     */
-    static void Exit(uint32_t exitCode);
-    
     /**
      * @brief 現在のスレッドを休止する
      * @param[in] millisecond 休止する時間(ミリ秒)
@@ -165,45 +192,25 @@ public:
      */
     static void YieldThread();
     
-    /**
-     * @brief 指定したスレッドのいずれかが終了するまで待つ
-     * @param[in] threadArray スレッドの配列
-     * @param[in] count       threadArrayに格納されるスレッド数
-     * @param[in] result      結果コード
-     * @param[in] millisecond タイムアウト時間(msec)
-     */
-    static void WaitAny(const Thread * threadArray[], const uint32_t count, sint32_t * results = nullptr, const uint32_t millisecond = FW_WAIT_INFINITE);
-
-    /**
-     * @brief 指定した全てのスレッドが終了するまで待つ
-     * @param[in] threadArray スレッドの配列
-     * @param[in] count       threadArrayに格納されるスレッド数
-     * @param[in] result      結果コード
-     * @param[in] millisecond タイムアウト時間(msec)
-     */
-    static void WaitAll(const Thread * threadArray[], const uint32_t count, sint32_t * results = nullptr, const uint32_t millisecond = FW_WAIT_INFINITE);
-
 
 protected:
     /**
      * @brief コンストラクタ
      */
-    Thread();
+    FwThread();
     
     /**
      * @brief デストラクタ
      */
-    ~Thread();
+    ~FwThread();
     
     
-    threadId_t      threadId;
-    threadHandle_t  threadHandle;
-    ThreadDesc      desc;
-    ThreadInfo *    threadInfo;
+    FwThreadDesc    desc;
+    FwThreadInfo *  threadInfo;
 
-#if defined(FW_PLATFORM_WIN32)
-#else
-    std::thread     threadInstance;
+#if FW_THREAD == FW_THREAD_WIN32
+    FwThreadId      threadId;
+    FwThreadHandle  threadHandle;
 #endif
 
  private:

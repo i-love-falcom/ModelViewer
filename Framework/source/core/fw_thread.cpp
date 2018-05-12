@@ -8,20 +8,23 @@
 BEGIN_NAMESPACE_FW
 BEGIN_NAMESPACE_NONAME
 /**
- * @struct ThreadInfo
+ * @class ThreadInfo
  */
-class ThreadInfo {
+class FwThreadInfo {
 public:
-    bool        terminate;
-    bool        raiseThread;
-    bool        waitWorkerThread;
-    bool        isWorkerThread;
-    char        name[MaxThreadNameLen + 1];
-    sint32_t    exitCode;
+    volatile bool   terminate;
+    bool            raiseThread;
+    bool            waitWorkerThread;
+    bool            isWorkerThread;
+    char            name[FwMaxThreadNameLen + 1];
+    sint32_t        exitCode;
 
     std::mutex                  threadMtx;
     std::condition_variable     raiseThreadCV;
     std::condition_variable     waitThreadCV;
+#if FW_THREAD == FW_THREAD_STL
+    std::thread                 thread;
+#endif
 
     void Init(const bool worker = false) {
         terminate = false;
@@ -33,11 +36,18 @@ public:
         exitCode = 0;
     }
 
-    ThreadInfo() {
+    FwThreadInfo()
+    : threadMtx()
+    , raiseThreadCV()
+    , waitThreadCV()
+#if FW_THREAD == FW_THREAD_STL
+    , thread()
+#endif
+    {
     }
 };
 
-static void SetThreadName(Thread * thread) {
+static void SetThreadName(FwThread * thread) {
 #if defined(FW_PLATFORM_WIN32)
     const uint32_t MS_VC_EXCEPTION = 0x406d1388;
 
@@ -53,7 +63,7 @@ static void SetThreadName(Thread * thread) {
     THREADNAME_INFO info;
     info.dwType = 0x1000;
     info.szName = thread->GetThreadInfo()->name;
-    info.dwThreadID = static_cast<DWORD>(thread->GetThreadId());
+    info.dwThreadID = ::GetCurrentThreadId();
     info.dwFlags = 0;
 
     __try {
@@ -61,28 +71,32 @@ static void SetThreadName(Thread * thread) {
     } __except (EXCEPTION_EXECUTE_HANDLER) {
         //! @todo 実装
     }
+#else
+    //! @todo プラットフォーム対応
 #endif
 }
 
-static unsigned __stdcall ThreadFunc(void * userArgs) {
-    Thread * thread = reinterpret_cast<Thread *>(userArgs);
-    ThreadInfo * threadInfo = thread->GetThreadInfo();
+static unsigned __stdcall ThreadEntryFunction(void * userArgs) {
+    FwThread * thread = reinterpret_cast<FwThread *>(userArgs);
+    FwThreadInfo * threadInfo = thread->GetThreadInfo();
 
     SetThreadName(thread);
 
-    if (threadInfo->isWorkerThread) {
-        while (true) {
-            {
-                std::unique_lock<std::mutex> lock(threadInfo->threadMtx);
+    // 起動後一旦ここで止める
+    {
+        std::unique_lock<std::mutex> lock(threadInfo->threadMtx);
 
-                threadInfo->raiseThreadCV.wait(lock, [&] { return threadInfo->raiseThread; });
-                threadInfo->raiseThread = false;
-                threadInfo->waitWorkerThread = false;
-            }
-            
-            if (!threadInfo->terminate) {
-                threadInfo->exitCode = thread->Invoke(thread->GetDesc().userArgs);
-            }
+        threadInfo->raiseThreadCV.wait(lock, [&] { return threadInfo->raiseThread; });
+        threadInfo->raiseThread = false;
+        threadInfo->waitWorkerThread = false;
+    }
+
+    // 初期化処理
+    thread->InitializeThreadFunc(thread->GetDesc().userArgs);
+
+    if (threadInfo->isWorkerThread) {
+        while (!threadInfo->terminate) {
+            threadInfo->exitCode = thread->ThreadFunc(thread->GetDesc().userArgs);
 
             // ワーカースレッドの終了を通知
             {
@@ -91,47 +105,50 @@ static unsigned __stdcall ThreadFunc(void * userArgs) {
             }
             threadInfo->waitThreadCV.notify_all();
 
-            if (threadInfo->terminate) {
-                break;
+            if (!threadInfo->terminate) {
+                std::unique_lock<std::mutex> lock(threadInfo->threadMtx);
+
+                threadInfo->raiseThreadCV.wait(lock, [&] { return threadInfo->raiseThread; });
+                threadInfo->raiseThread = false;
+                threadInfo->waitWorkerThread = false;
             }
         }
     } else {
-        threadInfo->exitCode = thread->Invoke(thread->GetDesc().userArgs);
+        threadInfo->exitCode = thread->ThreadFunc(thread->GetDesc().userArgs);
     }
 
-#if !defined(FW_PLATFORM_WIN32)
-    // このスレッド終了時に終了待ちスレッドを全て起こす
-    {
-        std::unique_lock<std::mutex> lock(threadInfo->threadMtx);
-        std::notify_all_at_thread_exit(threadInfo->waitThreadCV, std::move(lock));
-    }
-#endif
+    // 終了処理
+    thread->ShutdownThreadFunc(threadInfo->exitCode, thread->GetDesc().userArgs);
 
-    return static_cast<unsigned>(threadInfo->exitCode);
+    return 0;
 }
 END_NAMESPACE_NONAME
 
-Thread::Thread()
-: threadId(0)
+FwThread::FwThread()
+: threadInfo(nullptr)
+#if FW_THREAD == FW_THREAD_WIN32
+, threadId(0)
 , threadHandle(0)
-, threadInfo(nullptr) {
+#endif
+{
 }
 
-Thread::~Thread() {
+FwThread::~FwThread() {
+    Shutdown();
 }
 
-void Thread::Shutdown() {
+void FwThread::Shutdown() {
     TerminateThread();
 
     if (threadInfo != nullptr) {
-        ThreadInfo * ptr = threadInfo;
+        FwThreadInfo * ptr = threadInfo;
         threadInfo = nullptr;
 
         FwDelete(ptr);
     }
 }
 
-void Thread::Start(const ThreadDesc * threadDesc) {
+void FwThread::Start(const FwThreadDesc * threadDesc) {
     if (threadDesc == nullptr) {
         return;
     }
@@ -140,7 +157,7 @@ void Thread::Start(const ThreadDesc * threadDesc) {
     StartThread(false);
 }
 
-void Thread::StartWorker(const ThreadDesc * threadDesc) {
+void FwThread::StartWorker(const FwThreadDesc * threadDesc) {
     if (threadDesc == nullptr) {
         return;
     }
@@ -149,45 +166,53 @@ void Thread::StartWorker(const ThreadDesc * threadDesc) {
     StartThread(true);
 }
 
-void Thread::StartThread(const bool workerThread) {
+void FwThread::StartThread(const bool workerThread) {
     if (threadInfo == nullptr) {
-        threadInfo = FwNew<ThreadInfo>();
+        threadInfo = FwNew<FwThreadInfo>();
     }
     threadInfo->Init(workerThread);
 
-#if defined(FW_PLATFORM_WIN32)
-    #if defined(FW_UNICODE)
+#if defined(FW_UNICODE)
     size_t dstResult = 0;
     tstring::WCharToChar(&dstResult, threadInfo->name, ARRAY_SIZEOF(threadInfo->name), desc.name, ARRAY_SIZEOF(desc.name));
-    #endif
+#endif
 
+#if FW_THREAD == FW_THREAD_WIN32
     threadHandle = _beginthreadex(
         nullptr,
         static_cast<unsigned>(desc.stackSize),
-        ThreadFunc,
+        ThreadEntryFunction,
         this,
-        CREATE_SUSPENDED,
+        0,
         reinterpret_cast<unsigned *>(&threadId));
-
-    ::SetThreadAffinityMask(reinterpret_cast<HANDLE>(threadHandle), desc.affinity);
-    ::SetThreadPriority(reinterpret_cast<HANDLE>(threadHandle), desc.priority);
-    ::ResumeThread(reinterpret_cast<HANDLE>(threadHandle));
 #else
-    threadInstance.swap(std::thread(ThreadFunc, this));
-
-    threadId = threadInstance.get_id();
-    threadHandle = threadInstance.native_handle();
+    threadInfo->thread = std::move(std::thread(ThreadEntryFunction, this));
 #endif
+
+#if defined(FW_PLATFORM_WIN32)
+    FwThreadHandle hThread = GetThreadHandle();
+    ::SetThreadAffinityMask(reinterpret_cast<HANDLE>(hThread), desc.affinity);
+    ::SetThreadPriority(reinterpret_cast<HANDLE>(hThread), desc.priority);
+#else
+    //! @todo プラットフォーム対応
+#endif
+
+    // 初期化処理前で止まっているスレッドを起こす
+    {
+        std::lock_guard<std::mutex> lock(threadInfo->threadMtx);
+        threadInfo->raiseThread = true;
+    }
+    threadInfo->raiseThreadCV.notify_one();
 }
 
-void Thread::TerminateThread() {
+void FwThread::TerminateThread() {
     if (threadInfo != nullptr) {
         threadInfo->terminate = true;
-        RaiseWorkerThread();
+        RestartThread();
     }
 }
 
-void Thread::RaiseWorkerThread() {
+void FwThread::RestartThread() {
     if (threadInfo != nullptr && threadInfo->isWorkerThread) {
         {
             std::lock_guard<std::mutex> lock(threadInfo->threadMtx);
@@ -197,115 +222,66 @@ void Thread::RaiseWorkerThread() {
     }
 }
 
-sint32_t Thread::WaitThread(const uint32_t millisecond) {
-    if (threadHandle != 0) {
+sint32_t FwThread::WaitThread(const uint32_t millisecond) {
+    if (threadInfo != nullptr) {
         std::unique_lock<std::mutex> lock(threadInfo->threadMtx);
 
         if (threadInfo->isWorkerThread) {
             bool result = threadInfo->waitThreadCV.wait_for(lock, std::chrono::milliseconds(millisecond), [&] {return threadInfo->waitWorkerThread;});
             return result ? FW_OK : WAIT_TIMEOUT;
         } else {
-#if defined(FW_PLATFORM_WIN32)
+#if FW_THREAD == FW_THREAD_WIN32
             DWORD result = WaitForSingleObject((HANDLE)threadHandle, millisecond);
-
             return result == WAIT_OBJECT_0 ? FW_OK : (result == WAIT_TIMEOUT ? ERR_TIMEOUT : ERR_FAILED);
 #else
-            std::cv_status stat = threadInfo->waitThreadCV.wait_for(lock, std::chrono::milliseconds(millisecond));
-            return stat == std::cv_status::timeout ? WAIT_TIMEOUT : FW_OK;
+            threadInfo->thread.join();
+            return FW_OK;
 #endif
         }
     }
     return FW_OK;
 }
 
-uint32_t Thread::GetExitCode() {
+uint32_t FwThread::GetExitCode() {
     if (threadInfo != nullptr) {
         return threadInfo->exitCode;
     }
     return 0xffffffffu;
 }
 
+FwThreadId FwThread::GetThreadId() const {
+#if FW_THREAD == FW_THREAD_WIN32
+    return threadId;
+#elif FW_THREAD == FW_THREAD_STL
+    return threadInfo != nullptr ? threadInfo->thread.get_id() : std::thread::id();
+#endif
+}
+
+FwThreadHandle FwThread::GetThreadHandle() {
+#if FW_THREAD == FW_THREAD_WIN32
+    return threadHandle;
+#elif FW_THREAD == FW_THREAD_STL
+    return threadInfo != nullptr ? threadInfo->thread.native_handle() : nullptr;
+#endif
+}
+
 //-------------------------------------------
 // static method
 //-------------------------------------------
-threadId_t Thread::GetCurrentThreadId() {
-#if defined(FW_PLATFORM_WIN32)
-    return static_cast<threadId_t>(::GetCurrentThreadId());
-#else
+FwThreadId FwThread::GetCurrentThreadId() {
+#if FW_THREAD == FW_THREAD_WIN32
+    return ::GetCurrentThreadId();
+#elif FW_THREAD == FW_THREAD_STL
     return std::this_thread::get_id();
 #endif
 }
 
-void Thread::Exit(uint32_t exitCode) {
-#if defined(FW_PLATFORM_WIN32)
-    _endthreadex(exitCode);
-#endif
-}
-
-void Thread::Sleep(uint32_t millisecond) {
-#if defined(FW_PLATFORM_WIN32)
-    SleepEx(static_cast<DWORD>(millisecond), FALSE);
-#else
+void FwThread::Sleep(uint32_t millisecond) {
     std::this_thread::sleep_for(std::chrono::milliseconds(millisecond));
-#endif
 }
 
-void Thread::YieldThread() {
-#if defined(FW_PLATFORM_WIN32)
-    SwitchToThread();
-#else
+void FwThread::YieldThread() {
     std::this_thread::yield();
-#endif
-}
-
-void Thread::WaitAny(const Thread * threadArray[], const uint32_t count, sint32_t * results, const uint32_t millisecond) {
-#if defined(FW_PLATFORM_WIN32)
-    HANDLE handleArray[MAXIMUM_WAIT_OBJECTS];
-    for (uint32_t i = 0; i < count; ++i) {
-        handleArray[i] = reinterpret_cast<HANDLE>(threadArray[i]->GetThreadHandle());
-    }
-    DWORD r = WaitForMultipleObjects(count, handleArray, FALSE, millisecond);
-
-    if (results != nullptr) {
-        if (r == WAIT_FAILED) {
-            results[0] = ERR_FAILED;
-        } else if (WAIT_OBJECT_0 <= r && r < WAIT_OBJECT_0 + count) {
-            results[0] = FW_OK;
-        } else if (WAIT_ABANDONED_0 <= r && r < WAIT_ABANDONED_0 + count) {
-            results[0] = FW_OK;
-        } else if (r == WAIT_TIMEOUT) {
-            results[0] = ERR_TIMEOUT;
-        }
-        results[0] = ERR_UNKNOWN;
-    }
-#else
-    #error Unsupported
-#endif
-}
-
-void Thread::WaitAll(const Thread * threadArray[], const uint32_t count, sint32_t * results, const uint32_t millisecond) {
-#if defined(FW_PLATFORM_WIN32)
-    HANDLE handleArray[MAXIMUM_WAIT_OBJECTS];
-    for (uint32_t i = 0; i < count; ++i) {
-        handleArray[i] = reinterpret_cast<HANDLE>(threadArray[i]->GetThreadHandle());
-    }
-    DWORD r = WaitForMultipleObjects(count, handleArray, TRUE, millisecond);
-
-    if (results != nullptr) {
-        if (r == WAIT_FAILED) {
-            results[0] = ERR_FAILED;
-        } else if (WAIT_OBJECT_0 <= r && r < WAIT_OBJECT_0 + count) {
-            results[0] = FW_OK;
-        } else if (WAIT_ABANDONED_0 <= r && r < WAIT_ABANDONED_0 + count) {
-            results[0] = FW_OK;
-        } else if (r == WAIT_TIMEOUT) {
-            results[0] = ERR_TIMEOUT;
-        }
-        results[0] = ERR_UNKNOWN;
-    }
-#else
-    #error Unsupported
-#endif
 }
 
 END_NAMESPACE_FW

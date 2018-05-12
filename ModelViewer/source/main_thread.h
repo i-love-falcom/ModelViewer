@@ -9,7 +9,7 @@
 /**
  * @class MainThread
  */
-class MainThread : public NAMESPACE_FW Thread {
+class MainThread : public NAMESPACE_FW FwThread {
 public:
     enum {
         kDefaultStackSize = 1 * 1024 * 1024,
@@ -36,7 +36,7 @@ public:
      * @param[in] userArgs 任意のパラメータ
      * @return 終了コード
      */
-    virtual sint32_t Invoke(void * userArgs) FW_OVERRIDE;
+    virtual sint32_t ThreadFunc(void * userArgs) FW_OVERRIDE;
 
     /**
      * @brief メインスレッドの開始

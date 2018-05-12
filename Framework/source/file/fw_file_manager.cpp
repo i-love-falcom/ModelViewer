@@ -83,12 +83,12 @@ struct FileIOSharedBuffer {
 /**
  * @class FileIOThread
  */
-class FileIOThread : public Thread {
+class FileIOThread : public FwThread {
 public:
     FileIOSharedBuffer *    sharedBuffer;
 
 
-    virtual sint32_t Invoke(void * userArgs) FW_OVERRIDE {
+    virtual sint32_t ThreadFunc(void * userArgs) FW_OVERRIDE {
         
         while (true) {
             FileIOCommand cmd;
@@ -245,7 +245,7 @@ public:
         }
 
         // スレッドを起こす
-        fileIOThread->RaiseWorkerThread();
+        fileIOThread->RestartThread();
 
         // 送ったので消しておく
         localBuffer.clear();
@@ -281,7 +281,7 @@ public:
     void Init(FileManagerDesc * desc) {
         Path::GetCurrentDir(basePath, ARRAY_SIZEOF(basePath));
 
-        ThreadDesc threadDesc;
+        FwThreadDesc threadDesc;
         threadDesc.Init();
         threadDesc.affinity = desc->threadAffinity;
         threadDesc.priority = desc->threadPriority;

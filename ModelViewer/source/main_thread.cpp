@@ -32,7 +32,7 @@ MainThread::~MainThread() {
 
 }
 
-sint32_t MainThread::Invoke(void * userArgs) {
+sint32_t MainThread::ThreadFunc(void * userArgs) {
     // 初期化
     sint32_t result = Initialzie(userArgs);
     if (result != FW_OK) {
@@ -73,12 +73,12 @@ void MainThread::StartMainThread(const str_t name) {
 
     reinterpret_cast<MainThreadArgs *>(args)->Init(this);
 
-    ThreadDesc desc;
+    FwThreadDesc desc;
     desc.Init();
     desc.userArgs   = args;
     desc.stackSize  = MainThread::kDefaultStackSize;
     desc.priority   = kTheadPriorityNormal;
-    desc.affinity   = DefaultThreadAffinity;
+    desc.affinity   = DefaultFwThreadAffinity;
     tstring::SPrintf(desc.name, ARRAY_SIZEOF(desc.name), name);
 
     Start(&desc);

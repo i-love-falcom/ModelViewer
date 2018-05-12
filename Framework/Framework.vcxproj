@@ -25,6 +25,7 @@
     <ClInclude Include="include\container\fw_string.h" />
     <ClInclude Include="include\container\fw_vector.h" />
     <ClInclude Include="include\core\fw_allocator.h" />
+    <ClInclude Include="include\core\fw_build_config.h" />
     <ClInclude Include="include\core\fw_define.h" />
     <ClInclude Include="include\core\fw_error.h" />
     <ClInclude Include="include\core\fw_thread.h" />

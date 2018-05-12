@@ -19,11 +19,11 @@ class FileStream;
  * @struct FileManagerDesc
  */
 struct FileManagerDesc {
-    threadAffinity_t    threadAffinity;
-    threadPriority_t    threadPriority;
+    FwThreadAffinity    threadAffinity;
+    FwThreadPriority    threadPriority;
 
     FW_INLINE void Init() {
-        threadAffinity = DefaultThreadAffinity;
+        threadAffinity = DefaultFwThreadAffinity;
         threadPriority = kTheadPriorityNormal;
     }
 };

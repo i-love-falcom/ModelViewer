@@ -3,6 +3,7 @@
  */
 #ifndef FW_FRAMEWORK_H_
 
+#include "core/fw_build_config.h"
 #include "core/fw_define.h"
 #include "core/fw_types.h"
 #include "core/fw_error.h"
