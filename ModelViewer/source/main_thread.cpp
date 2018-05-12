@@ -69,7 +69,7 @@ void MainThread::Shutdown() {
 
 void MainThread::StartMainThread(const str_t name) {
     args = FwMalloc(sizeof(MainThreadArgs), defaultFwMallocAttribute);
-    assert(args != nullptr);
+    FwAssert(args != nullptr);
 
     reinterpret_cast<MainThreadArgs *>(args)->Init(this);
 

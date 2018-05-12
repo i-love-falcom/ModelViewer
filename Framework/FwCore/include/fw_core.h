@@ -1,7 +1,7 @@
 ﻿/**
- * @file framework.h
+ * @file fw_core.h
  */
-#ifndef FW_FRAMEWORK_H_
+#ifndef FW_CORE_H_
 
 #include "core/fw_build_config.h"
 #include "core/fw_define.h"
@@ -27,4 +27,4 @@
 #include "file/fw_file_stream.h"
 #include "file/fw_file_manager.h"
 
-#endif  // FW_FRAMEWORK_H_
+#endif  // FW_CORE_H_

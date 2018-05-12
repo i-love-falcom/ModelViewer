@@ -35,9 +35,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="include\framework.h">
-      <Filter>header files</Filter>
-    </ClInclude>
     <ClInclude Include="include\core\fw_define.h">
       <Filter>header files\core</Filter>
     </ClInclude>
@@ -107,6 +104,9 @@
     <ClInclude Include="include\core\fw_build_config.h">
       <Filter>header files\core</Filter>
     </ClInclude>
+    <ClInclude Include="include\fw_core.h">
+      <Filter>header files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="source\debug\fw_debug_log.cpp">
@@ -130,7 +130,7 @@
     <ClCompile Include="source\core\fw_thread.cpp">
       <Filter>source files\core</Filter>
     </ClCompile>
-    <ClCompile Include="source\framework.cpp">
+    <ClCompile Include="source\fw_core.cpp">
       <Filter>source files</Filter>
     </ClCompile>
   </ItemGroup>

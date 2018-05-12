@@ -64,11 +64,11 @@ static void fwDefaultFreeFunc(void * ptr) {
 
     // ヘッダ
     fwMemBlockHeader * header = reinterpret_cast<fwMemBlockHeader *>(reinterpret_cast<uintptr_t>(ptr) - sizeof(fwMemBlockHeader));
-    assert(header->marker == s_memBlockMarker);
+    FwAssert(header->marker == s_memBlockMarker);
 
     // フッタ
     fwMemBlockFooter * footer = reinterpret_cast<fwMemBlockFooter *>(reinterpret_cast<uintptr_t>(ptr) + header->blockSize);
-    assert(footer->marker == s_memBlockMarker);
+    FwAssert(footer->marker == s_memBlockMarker);
     
     void * origin = reinterpret_cast<void *>(reinterpret_cast<uintptr_t>(ptr) - header->offsetBytes);
     return _free_dbg(origin, _NORMAL_BLOCK);

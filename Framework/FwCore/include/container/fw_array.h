@@ -47,12 +47,12 @@ public:
     }
 
     reference at(size_type idx) {
-        assert(check_range(idx));
+        FwAssert(check_range(idx));
         return buffer[idx];
     }
 
     const_reference at(size_type idx) const {
-        assert(check_range(idx));
+        FwAssert(check_range(idx));
         return buffer[idx];
     }
 
@@ -172,12 +172,12 @@ public:
     }
 
     reference at(size_type idx) {
-        assert(check_range(idx));
+        FwAssert(check_range(idx));
         return ref(idx);
     }
 
     const_reference at(size_type idx) const {
-        assert(check_range(idx));
+        FwAssert(check_range(idx));
         return ref(idx);
     }
 

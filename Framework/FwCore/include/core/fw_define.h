@@ -81,14 +81,16 @@
 //---------------------------------------------
 #if defined(_DEBUG)
     #define FW_DEBUG                    (1)
-#elif defined(_NDEBUG)
+#else
     #define FW_RELEASE                  (1)
+#endif
+
+#if defined(NDEBUG)
+    #define FW_NDEBUG                   (1)
 #endif
 
 #if defined(STATIC_LIB)
     #define FW_STATIC_LIB               (1)
-#elif defined(DLL_BUILD)
-    #define FW_DLL_BUILD                (1)
 #endif
 
 
@@ -156,9 +158,6 @@
 #if defined(FW_STATIC_LIB)
     #define FW_DLL
     #define FW_DLL_FUNC                 extern
-#elif defined(FW_DLL_BUILD)
-    #define FW_DLL                      FW_EXPORT
-    #define FW_DLL_FUNC                 FW_EXPORT_FUNC
 #else
     #define FW_DLL                      FW_IMPORT
     #define FW_DLL_FUNC                 FW_IMPORT_FUNC

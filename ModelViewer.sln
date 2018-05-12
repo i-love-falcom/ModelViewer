@@ -1,14 +1,20 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.26228.12
+VisualStudioVersion = 15.0.27130.2027
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ModelViewer", "ModelViewer\ModelViewer.vcxproj", "{AB22DDE8-E8FA-40FF-8A75-2C409BA748BE}"
 	ProjectSection(ProjectDependencies) = postProject
+		{C1E26A6D-2E0E-48F2-B698-9D35FCF2BFDB} = {C1E26A6D-2E0E-48F2-B698-9D35FCF2BFDB}
 		{7C7184A4-C6CF-437A-A2BA-AD3E85DB51E8} = {7C7184A4-C6CF-437A-A2BA-AD3E85DB51E8}
 	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Framework", "Framework\Framework.vcxproj", "{7C7184A4-C6CF-437A-A2BA-AD3E85DB51E8}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "FwCore", "Framework\FwCore\FwCore.vcxproj", "{7C7184A4-C6CF-437A-A2BA-AD3E85DB51E8}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "FwRenderer", "Framework\FwRenderer\FwRenderer.vcxproj", "{C1E26A6D-2E0E-48F2-B698-9D35FCF2BFDB}"
+	ProjectSection(ProjectDependencies) = postProject
+		{7C7184A4-C6CF-437A-A2BA-AD3E85DB51E8} = {7C7184A4-C6CF-437A-A2BA-AD3E85DB51E8}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -34,8 +40,19 @@ Global
 		{7C7184A4-C6CF-437A-A2BA-AD3E85DB51E8}.Release|x64.Build.0 = Release|x64
 		{7C7184A4-C6CF-437A-A2BA-AD3E85DB51E8}.Release|x86.ActiveCfg = Release|Win32
 		{7C7184A4-C6CF-437A-A2BA-AD3E85DB51E8}.Release|x86.Build.0 = Release|Win32
+		{C1E26A6D-2E0E-48F2-B698-9D35FCF2BFDB}.Debug|x64.ActiveCfg = Debug|x64
+		{C1E26A6D-2E0E-48F2-B698-9D35FCF2BFDB}.Debug|x64.Build.0 = Debug|x64
+		{C1E26A6D-2E0E-48F2-B698-9D35FCF2BFDB}.Debug|x86.ActiveCfg = Debug|Win32
+		{C1E26A6D-2E0E-48F2-B698-9D35FCF2BFDB}.Debug|x86.Build.0 = Debug|Win32
+		{C1E26A6D-2E0E-48F2-B698-9D35FCF2BFDB}.Release|x64.ActiveCfg = Release|x64
+		{C1E26A6D-2E0E-48F2-B698-9D35FCF2BFDB}.Release|x64.Build.0 = Release|x64
+		{C1E26A6D-2E0E-48F2-B698-9D35FCF2BFDB}.Release|x86.ActiveCfg = Release|Win32
+		{C1E26A6D-2E0E-48F2-B698-9D35FCF2BFDB}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {DB188CA8-767F-4903-9ED8-6F684E3A0956}
 	EndGlobalSection
 EndGlobal

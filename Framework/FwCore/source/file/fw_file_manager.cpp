@@ -110,16 +110,16 @@ public:
             // 読み込み／書き込み位置を移動
             if ((cmd.flags & FileIOCommand::kFlagFileSeek) != 0) {
                 sint32_t result = FileSeek(cmd.fp, cmd.seekOffset, cmd.seekOrigin);
-                assert(result != FW_OK);
+                FwAssert(result != FW_OK);
             }
 
             // ファイルアクセス
             if ((cmd.flags & FileIOCommand::kFlagFileRead) != 0) {
                 sint32_t result = FileRead(cmd.fp, cmd.rwBuffer, cmd.rwSize, nullptr);
-                assert(result == FW_OK);
+                FwAssert(result == FW_OK);
             } else if ((cmd.flags & FileIOCommand::kFlagFileWrite) != 0) {
                 sint32_t result = FileWrite(cmd.fp, cmd.rwBuffer, cmd.rwSize, nullptr);
-                assert(result == FW_OK);
+                FwAssert(result == FW_OK);
             }
 
             // 終了通知

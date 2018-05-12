@@ -1,10 +1,10 @@
 ﻿/**
- * @file framework.cpp
+ * @file fw_core.cpp
  * @author Kamai Masayoshi
  */
 #include "precompiled.h"
 
-#if defined(FW_PLATFORM_WIN32) && defined(FW_DLL_BUILD)
+#if defined(FW_PLATFORM_WIN32) && !defined(STATIC_LIB)
 BEGIN_NAMESPACE_NONAME
 /**
  * @brief 現在のプロセス空間にDLLをロードした際に呼ばれる

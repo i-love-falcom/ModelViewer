@@ -24,6 +24,15 @@
 
 #include "core/fw_build_config.h"
 #include "core/fw_define.h"
+
+// 静的ライブラリでなければエクスポート設定に置き換える
+#if !defined(STATIC_LIB)
+    #undef FW_DLL
+    #undef FW_DLL_FUNC
+    #define FW_DLL                      FW_EXPORT
+    #define FW_DLL_FUNC                 FW_EXPORT_FUNC
+#endif
+
 #include "core/fw_error.h"
 #include "core/fw_types.h"
 #include "core/fw_allocator.h"

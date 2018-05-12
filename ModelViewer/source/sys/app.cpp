@@ -90,7 +90,7 @@ void App::Initialize(AppParms & parms, CommandLineArgs & args) {
 
     hWnd = CreateWindow(appName, appName, WS_CAPTION | WS_SYSMENU | WS_BORDER | WS_DLGFRAME,
         0, 0, clientWidth, clientHeight, nullptr, nullptr, hInstance, nullptr);
-    assert(hWnd != nullptr);
+    FwAssert(hWnd != nullptr);
 
     ShowWindow(hWnd, parms.cmdShow);
     UpdateWindow(hWnd);

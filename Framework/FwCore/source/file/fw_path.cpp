@@ -25,7 +25,7 @@ static const char_t s_invalidPathChars[] = {
 
 // ファイル名禁則文字が含まれるか調べる
 static bool CheckValidFileName(const str_t path) {
-    assert(path != nullptr);
+    FwAssert(path != nullptr);
 
     const size_t pathLen = tstring::Length(path);
 
@@ -46,7 +46,7 @@ static bool CheckValidFileName(const str_t path) {
 
 // パス禁則文字が含まれるか調べる
 static bool CheckValidPath(const str_t path) {
-    assert(path != nullptr);
+    FwAssert(path != nullptr);
 
     const size_t pathLen = tstring::Length(path);
 
@@ -66,7 +66,7 @@ static bool CheckValidPath(const str_t path) {
 }
 
 static str_t AddPath(str_t buffer, const size_t numOfElements, const str_t path) {
-    assert(CheckValidPath(path));
+    FwAssert(CheckValidPath(path));
 
     if (Path::IsPathRooted(path)) {
         tstring::Copy(buffer, numOfElements, path);
@@ -122,11 +122,11 @@ size_t Path::GetNumInvalidPathChars() {
 str_t Path::GetUserDir(str_t buffer, const size_t numOfElements) {
     if (numOfElements >= MAX_PATH) {
         HRESULT hr = SHGetFolderPath(NULL, CSIDL_MYDOCUMENTS, NULL, SHGFP_TYPE_CURRENT, buffer);
-        assert(hr == S_OK);
+        FwAssert(hr == S_OK);
     } else {
         char_t out[MAX_PATH];
         HRESULT hr = SHGetFolderPath(NULL, CSIDL_MYDOCUMENTS, NULL, SHGFP_TYPE_CURRENT, out);
-        assert(hr == S_OK);
+        FwAssert(hr == S_OK);
 
         tstring::Copy(buffer, numOfElements, out);
     }
@@ -245,8 +245,8 @@ str_t Path::Normalize(str_t buffer, const size_t numOfElements, const str_t path
 }
 
 str_t Path::Combine(str_t buffer, const size_t numOfElements, const str_t path1, const str_t path2) {
-    assert(buffer != nullptr);
-    assert(numOfElements > 0);
+    FwAssert(buffer != nullptr);
+    FwAssert(numOfElements > 0);
 
     AddPath(buffer, numOfElements, path1);
     AddPath(buffer, numOfElements, path2);
@@ -255,8 +255,8 @@ str_t Path::Combine(str_t buffer, const size_t numOfElements, const str_t path1,
 }
 
 str_t Path::Combine(str_t buffer, const size_t numOfElements, const str_t path1, const str_t path2, const str_t path3) {
-    assert(buffer != nullptr);
-    assert(numOfElements > 0);
+    FwAssert(buffer != nullptr);
+    FwAssert(numOfElements > 0);
 
     AddPath(buffer, numOfElements, path1);
     AddPath(buffer, numOfElements, path2);
@@ -266,8 +266,8 @@ str_t Path::Combine(str_t buffer, const size_t numOfElements, const str_t path1,
 }
 
 str_t Path::Combine(str_t buffer, const size_t numOfElements, const str_t path1, const str_t path2, const str_t path3, const str_t path4) {
-    assert(buffer != nullptr);
-    assert(numOfElements > 0);
+    FwAssert(buffer != nullptr);
+    FwAssert(numOfElements > 0);
 
     AddPath(buffer, numOfElements, path1);
     AddPath(buffer, numOfElements, path2);
@@ -286,9 +286,9 @@ str_t Combine(str_t buffer, const size_t numOfElements, const str_t * paths, con
 }
 
 str_t Path::MakeTempFileName(str_t buffer, const size_t numOfElements, const str_t name, const uint32_t index) {
-    assert(buffer != nullptr);
-    assert(numOfElements > 0);
-    assert(name != nullptr);
+    FwAssert(buffer != nullptr);
+    FwAssert(numOfElements > 0);
+    FwAssert(name != nullptr);
 
     tstring::SPrintf(buffer, sizeof(char_t) * numOfElements, _T("%s%08x"), name, index);
 
@@ -296,9 +296,9 @@ str_t Path::MakeTempFileName(str_t buffer, const size_t numOfElements, const str
 }
 
 str_t Path::MakeTempFileNameWithDir(str_t buffer, const size_t numOfElements, const str_t name) {
-    assert(buffer != nullptr);
-    assert(numOfElements > 0);
-    assert(name != nullptr);
+    FwAssert(buffer != nullptr);
+    FwAssert(numOfElements > 0);
+    FwAssert(name != nullptr);
 
     char_t tmpPath[kMaxPathLen];
     GetTempDir(tmpPath, ARRAY_SIZEOF(tmpPath));
@@ -309,9 +309,9 @@ str_t Path::MakeTempFileNameWithDir(str_t buffer, const size_t numOfElements, co
 }
 
 str_t Path::MakeTempFileNameWithDir(str_t buffer, const size_t numOfElements, const str_t name, const uint32_t index) {
-    assert(buffer != nullptr);
-    assert(numOfElements > 0);
-    assert(name != nullptr);
+    FwAssert(buffer != nullptr);
+    FwAssert(numOfElements > 0);
+    FwAssert(name != nullptr);
 
     char_t tmpPath[kMaxPathLen];
     GetTempDir(tmpPath, ARRAY_SIZEOF(tmpPath));
@@ -322,9 +322,9 @@ str_t Path::MakeTempFileNameWithDir(str_t buffer, const size_t numOfElements, co
 }
 
 str_t Path::GetDirName(str_t buffer, const size_t numOfElements, const str_t path) {
-    assert(buffer != nullptr);
-    assert(numOfElements > 0);
-    assert(CheckValidPath(path));
+    FwAssert(buffer != nullptr);
+    FwAssert(numOfElements > 0);
+    FwAssert(CheckValidPath(path));
 
     const size_t pathLen = tstring::Length(path);
     if (pathLen == 3) {
@@ -334,7 +334,7 @@ str_t Path::GetDirName(str_t buffer, const size_t numOfElements, const str_t pat
             path[2] == DirSeparator()) {
             buffer[0] = _T('\0');
         } else {
-            assert(0);
+            FwAssert(0);
         }
     } else {
         // DirSeparator()を探す
@@ -362,9 +362,9 @@ str_t Path::GetDirName(str_t buffer, const size_t numOfElements, const str_t pat
 }
     
 str_t Path::GetFileName(str_t buffer, const size_t numOfElements, const str_t path) {
-    assert(buffer != nullptr);
-    assert(numOfElements > 0);
-    assert(CheckValidPath(path));
+    FwAssert(buffer != nullptr);
+    FwAssert(numOfElements > 0);
+    FwAssert(CheckValidPath(path));
 
     const size_t pathLen = tstring::Length(path);
     
@@ -393,9 +393,9 @@ str_t Path::GetFileName(str_t buffer, const size_t numOfElements, const str_t pa
 }
     
 str_t Path::GetExtension(str_t buffer, const size_t numOfElements, const str_t path) {
-    assert(buffer != nullptr);
-    assert(numOfElements > 0);
-    assert(CheckValidPath(path));
+    FwAssert(buffer != nullptr);
+    FwAssert(numOfElements > 0);
+    FwAssert(CheckValidPath(path));
 
     const size_t pathLen = tstring::Length(path);
     
@@ -435,9 +435,9 @@ str_t Path::GetExtension(str_t buffer, const size_t numOfElements, const str_t p
 }
     
 str_t Path::GetFileNameWithoutExtension(str_t buffer, const size_t numOfElements, const str_t path) {
-    assert(buffer != nullptr);
-    assert(numOfElements > 0);
-    assert(CheckValidPath(path));
+    FwAssert(buffer != nullptr);
+    FwAssert(numOfElements > 0);
+    FwAssert(CheckValidPath(path));
 
     const size_t pathLen = tstring::Length(path);
     
@@ -483,9 +483,9 @@ str_t Path::GetFileNameWithoutExtension(str_t buffer, const size_t numOfElements
 }
 
 str_t Path::GetPathRoot(str_t buffer, const size_t numOfElements, const str_t path) {
-    assert(buffer != nullptr);
-    assert(numOfElements > 0);
-    assert(CheckValidPath(path));
+    FwAssert(buffer != nullptr);
+    FwAssert(numOfElements > 0);
+    FwAssert(CheckValidPath(path));
 
     const size_t pathLen = tstring::Length(path);
 
@@ -510,8 +510,8 @@ str_t Path::GetPathRoot(str_t buffer, const size_t numOfElements, const str_t pa
 
 str_t Path::ChangeExtension(str_t buffer, const size_t numOfElements, const str_t path, const str_t extension) {
     GetFileNameWithoutExtension(buffer, numOfElements, path);
-    assert(CheckValidPath(path));
-    assert(CheckValidFileName(extension));
+    FwAssert(CheckValidPath(path));
+    FwAssert(CheckValidFileName(extension));
     
     if (extension[0] != _T('.')) {
         tstring::Concat(buffer, numOfElements, _T("."));
@@ -522,7 +522,7 @@ str_t Path::ChangeExtension(str_t buffer, const size_t numOfElements, const str_
 }
 
 bool Path::HasExtension(const str_t path) {
-    assert(CheckValidPath(path));
+    FwAssert(CheckValidPath(path));
 
     const size_t pathLen = tstring::Length(path);
     
@@ -554,7 +554,7 @@ bool Path::HasExtension(const str_t path) {
 }
 
 bool Path::IsPathRooted(const str_t path) {
-    assert(CheckValidPath(path));
+    FwAssert(CheckValidPath(path));
 
     if ((path[0] == DirSeparator()) || 
         (path[0] == AltDirSeparator()) || 

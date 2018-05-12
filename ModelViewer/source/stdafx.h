@@ -20,7 +20,7 @@
 #include <memory.h>
 #include <tchar.h>
 
-#include "framework.h"
+#include "fw_core.h"
 
 
 // TODO: プログラムに必要な追加ヘッダーをここで参照してください
