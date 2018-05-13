@@ -14,13 +14,10 @@
 BEGIN_NAMESPACE_FW
 BEGIN_NAMESPACE_NONAME
 
-class FileReadStreamImpl;
-class FileWriteStreamImpl;
-
 /**
- * @struct FileIONotification
+ * @struct FwFileIONotification
  */
-struct FileIONotification {
+struct FwFileIONotification {
     std::mutex                  mtx;
     std::condition_variable     cv;
     bool                        ready;
@@ -49,9 +46,9 @@ struct FileIONotification {
 };
 
 /**
- * @struct FileIOCommand
+ * @struct FwFileIOCommand
  */
-struct FileIOCommand {
+struct FwFileIOCommand {
     enum {
         kFlagFileRead       = BIT32(0),
         kFlagFileWrite      = BIT32(1),
@@ -59,39 +56,39 @@ struct FileIOCommand {
         kFlagNotification   = BIT32(3),
     };
 
-    file_t      fp;
+    FwFile      fp;
     sint32_t    flags;
     uint32_t    priority;
-    SeekOrigin  seekOrigin;
+    FwSeekOrigin  seekOrigin;
     sint64_t    seekOffset;
 
     void *      rwBuffer;
     uint64_t    rwSize;
 
-    FileIONotification * notification;
+    FwFileIONotification * notification;
 };
 
 
 /**
- * @struct FileIOSharedBuffer
+ * @struct FwFileIOSharedBuffer
  */
-struct FileIOSharedBuffer {
-    deque<FileIOCommand>    commandQueue;
+struct FwFileIOSharedBuffer {
+    deque<FwFileIOCommand>  commandQueue;
     std::mutex              commandQueueMutex;
 };
 
 /**
- * @class FileIOThread
+ * @class FwFileIOThread
  */
-class FileIOThread : public FwThread {
+class FwFileIOThread : public FwThread {
 public:
-    FileIOSharedBuffer *    sharedBuffer;
+    FwFileIOSharedBuffer *  sharedBuffer;
 
 
     virtual sint32_t ThreadFunc(void * userArgs) FW_OVERRIDE {
         
         while (true) {
-            FileIOCommand cmd;
+            FwFileIOCommand cmd;
             
             // キューからコマンドを取得
             bool foundNewCommand = false;
@@ -108,22 +105,22 @@ public:
             }
 
             // 読み込み／書き込み位置を移動
-            if ((cmd.flags & FileIOCommand::kFlagFileSeek) != 0) {
-                sint32_t result = FileSeek(cmd.fp, cmd.seekOffset, cmd.seekOrigin);
+            if ((cmd.flags & FwFileIOCommand::kFlagFileSeek) != 0) {
+                sint32_t result = FwFileSeek(cmd.fp, cmd.seekOffset, cmd.seekOrigin);
                 FwAssert(result != FW_OK);
             }
 
             // ファイルアクセス
-            if ((cmd.flags & FileIOCommand::kFlagFileRead) != 0) {
-                sint32_t result = FileRead(cmd.fp, cmd.rwBuffer, cmd.rwSize, nullptr);
+            if ((cmd.flags & FwFileIOCommand::kFlagFileRead) != 0) {
+                sint32_t result = FwFileRead(cmd.fp, cmd.rwBuffer, cmd.rwSize, nullptr);
                 FwAssert(result == FW_OK);
-            } else if ((cmd.flags & FileIOCommand::kFlagFileWrite) != 0) {
-                sint32_t result = FileWrite(cmd.fp, cmd.rwBuffer, cmd.rwSize, nullptr);
+            } else if ((cmd.flags & FwFileIOCommand::kFlagFileWrite) != 0) {
+                sint32_t result = FwFileWrite(cmd.fp, cmd.rwBuffer, cmd.rwSize, nullptr);
                 FwAssert(result == FW_OK);
             }
 
             // 終了通知
-            if ((cmd.flags & FileIOCommand::kFlagNotification) != 0) {
+            if ((cmd.flags & FwFileIOCommand::kFlagNotification) != 0) {
                 cmd.notification->Notify();
             }
         }
@@ -135,26 +132,26 @@ public:
 /**
  * @class FileStreamImpl
  */
-class FileStreamImpl : public FileStream {
+class FileStreamImpl : public FwFileStream {
 public:
-    char_t      filePath[Path::kMaxPathLen + 1];
-    file_t      fileHandle;
+    char_t      filePath[FwPath::kMaxPathLen + 1];
+    FwFile      fileHandle;
     uint32_t    priority;
 
     sint64_t    seekOffset;
-    SeekOrigin  seekOrigin;
+    FwSeekOrigin  seekOrigin;
     bool        updateFileSeek;
 
-    vector<FileIOCommand>   localBuffer;
-    FileIONotification      finishNotification;
+    vector<FwFileIOCommand>   localBuffer;
+    FwFileIONotification      finishNotification;
 
-    FileIOThread *          fileIOThread;
+    FwFileIOThread *          fileIOThread;
 
 
     // ファイルを閉じる
     virtual void DoClose() FW_OVERRIDE {
-        SubmitDone();
-        FileClose(fileHandle);
+        Wait();
+        FwFileClose(fileHandle);
 
         // 自身を破棄
         FwDelete<FileStreamImpl>(this);
@@ -163,13 +160,13 @@ public:
     // ファイルの長さを取得
     virtual uint64_t DoLength() FW_OVERRIDE {
         uint64_t fileLength = 0;
-        GetFileLength(filePath, &fileLength);
+        FwFileGetLength(filePath, &fileLength);
 
         return fileLength;
     }
 
     // ファイルの位置を移動する
-    virtual void DoSeek(const sint64_t offset, const SeekOrigin origin) FW_OVERRIDE {
+    virtual void DoSeek(const sint64_t offset, const FwSeekOrigin origin) FW_OVERRIDE {
         if (seekOffset != offset || seekOrigin != origin) {
             seekOffset = offset;
             seekOrigin = origin;
@@ -184,9 +181,9 @@ public:
             return ERR_INVALID;
         }
 
-        FileIOCommand & cmd = localBuffer.append();
+        FwFileIOCommand & cmd = localBuffer.append();
         cmd.fp              = fileHandle;
-        cmd.flags           = FileIOCommand::kFlagFileRead;
+        cmd.flags           = FwFileIOCommand::kFlagFileRead;
         cmd.priority        = priority;
         cmd.seekOrigin      = seekOrigin;
         cmd.seekOffset      = seekOffset;
@@ -194,7 +191,7 @@ public:
         cmd.rwSize          = readSize;
 
         if (updateFileSeek) {
-            cmd.flags |= FileIOCommand::kFlagFileSeek;
+            cmd.flags |= FwFileIOCommand::kFlagFileSeek;
             updateFileSeek = false;
         }
 
@@ -207,16 +204,16 @@ public:
             return ERR_INVALID;
         }
 
-        FileIOCommand & cmd = localBuffer.append();
+        FwFileIOCommand & cmd = localBuffer.append();
         cmd.fp              = fileHandle;
-        cmd.flags           = FileIOCommand::kFlagFileWrite;
+        cmd.flags           = FwFileIOCommand::kFlagFileWrite;
         cmd.seekOrigin      = seekOrigin;
         cmd.seekOffset      = seekOffset;
         cmd.rwBuffer        = const_cast<void *>(src);
         cmd.rwSize          = writeSize;
 
         if (updateFileSeek) {
-            cmd.flags |= FileIOCommand::kFlagFileSeek;
+            cmd.flags |= FwFileIOCommand::kFlagFileSeek;
             updateFileSeek = false;
         }
 
@@ -226,19 +223,19 @@ public:
     // 処理を送出する
     virtual void DoSubmit() FW_OVERRIDE {
         auto & cmd = localBuffer.back();
-        cmd.flags |= FileIOCommand::kFlagNotification;
+        cmd.flags |= FwFileIOCommand::kFlagNotification;
         cmd.notification = &finishNotification;
 
         finishNotification.Reset();
 
-        FileIOSharedBuffer * sharedBuffer = fileIOThread->sharedBuffer;
+        FwFileIOSharedBuffer * sharedBuffer = fileIOThread->sharedBuffer;
         {
             // 共有バッファのキューにコマンドを積む
             std::lock_guard<std::mutex> lock(sharedBuffer->commandQueueMutex);
 
             // 優先度でソート
             auto itr = std::lower_bound(sharedBuffer->commandQueue.begin(), sharedBuffer->commandQueue.end(),
-                localBuffer.front(), [](const FileIOCommand & a, const FileIOCommand & b) { return a.priority - b.priority; });
+                localBuffer.front(), [](const FwFileIOCommand & a, const FwFileIOCommand & b) { return a.priority - b.priority; });
 
             // 見つかった位置に全て挿入
             sharedBuffer->commandQueue.insert(itr, localBuffer.begin(), localBuffer.end());
@@ -252,7 +249,7 @@ public:
     }
 
     // 実行中の処理が完了するまで待つ
-    virtual sint32_t DoSubmitDone(const uint32_t milliseconds) FW_OVERRIDE {
+    virtual sint32_t DoWait(const uint32_t milliseconds) FW_OVERRIDE {
         bool result = true;
 
         if (milliseconds != FW_WAIT_INFINITE) {
@@ -275,11 +272,11 @@ public:
 /**
  * @class FileManagerImpl
  */
-class FileManagerImpl : public FileManager {
+class FileManagerImpl : public FwFileManager {
 public:
     // 初期化
-    void Init(FileManagerDesc * desc) {
-        Path::GetCurrentDir(basePath, ARRAY_SIZEOF(basePath));
+    void Init(FwFileManagerDesc * desc) {
+        FwPath::GetCurrentDir(basePath, ARRAY_SIZEOF(basePath));
 
         FwThreadDesc threadDesc;
         threadDesc.Init();
@@ -297,9 +294,9 @@ public:
     }
 
     // ファイルストリームを開く
-    virtual FileStream * DoFileStreamOpen(const str_t filePath, const sint32_t options, const uint32_t priority) FW_OVERRIDE {
-        file_t fp;
-        sint32_t result = FileOpen(filePath, options, fp);
+    virtual FwFileStream * DoFileStreamOpen(const str_t filePath, const sint32_t options, const uint32_t priority) FW_OVERRIDE {
+        FwFile fp;
+        sint32_t result = FwFileOpen(filePath, options, fp);
         if (result != FW_OK) {
             return nullptr;
         }
@@ -335,16 +332,16 @@ public:
 
 
 private:
-    char_t  basePath[Path::kMaxPathLen + 1];
+    char_t  basePath[FwPath::kMaxPathLen + 1];
 
-    FileIOSharedBuffer  sharedBuffer;
-    FileIOThread        fileIOThread;
+    FwFileIOSharedBuffer  sharedBuffer;
+    FwFileIOThread        fileIOThread;
 };
 
 END_NAMESPACE_NONAME
 
 // 生成
-FileManager * CreateFileManager(FileManagerDesc * desc) {
+FwFileManager * CreateFileManager(FwFileManagerDesc * desc) {
     FileManagerImpl * manager = FwNew<FileManagerImpl>();
     manager->Init(desc);
 

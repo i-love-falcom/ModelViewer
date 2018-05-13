@@ -12,26 +12,26 @@
 
 BEGIN_NAMESPACE_FW
 
-class FileStream;
+class FwFileStream;
 
 
 /**
- * @struct FileManagerDesc
+ * @struct FwFileManagerDesc
  */
-struct FileManagerDesc {
+struct FwFileManagerDesc {
     FwThreadAffinity    threadAffinity;
     FwThreadPriority    threadPriority;
 
     FW_INLINE void Init() {
         threadAffinity = DefaultFwThreadAffinity;
-        threadPriority = kTheadPriorityNormal;
+        threadPriority = FwThreadPriority::kTheadPriorityNormal;
     }
 };
 
 /**
- * @class FileManager
+ * @class FwFileManager
  */
-class FileManager : public NonCopyable<FileManager> {
+class FwFileManager : public NonCopyable<FwFileManager> {
 public:
     /**
      * @brief 終了処理
@@ -48,9 +48,9 @@ public:
      * @param[in] priority      処理優先度
      * @return ファイルストリームオブジェクト
      */
-    FW_INLINE FileStream * FileStreamOpen(const str_t relativePath, const str_t fileName, const sint32_t options, const uint32_t priority = kFilePriorityNormal) {
-        char_t tmpPath[Path::kMaxPathLen + 1];
-        return DoFileStreamOpen(Path::Combine(tmpPath, ARRAY_SIZEOF(tmpPath), GetBasePath(), relativePath, fileName), options, priority);
+    FW_INLINE FwFileStream * FileStreamOpen(const str_t relativePath, const str_t fileName, const sint32_t options, const uint32_t priority = kFilePriorityNormal) {
+        char_t tmpPath[FwPath::kMaxPathLen + 1];
+        return DoFileStreamOpen(FwPath::Combine(tmpPath, ARRAY_SIZEOF(tmpPath), GetBasePath(), relativePath, fileName), options, priority);
     }
 
     /**
@@ -59,9 +59,9 @@ public:
      * @param[in] options  オプション
      * @return ファイルストリームオブジェクト
      */
-    FW_INLINE FileStream * FileStreamOpen(const str_t fileName, const sint32_t options) {
-        char_t tmpPath[Path::kMaxPathLen + 1];
-        return DoFileStreamOpen(Path::Combine(tmpPath, ARRAY_SIZEOF(tmpPath), GetBasePath(), fileName), options, kFilePriorityNormal);
+    FW_INLINE FwFileStream * FileStreamOpen(const str_t fileName, const sint32_t options) {
+        char_t tmpPath[FwPath::kMaxPathLen + 1];
+        return DoFileStreamOpen(FwPath::Combine(tmpPath, ARRAY_SIZEOF(tmpPath), GetBasePath(), fileName), options, kFilePriorityNormal);
     }
 
     /**
@@ -90,7 +90,7 @@ protected:
     /**
      * @brief ファイルを開く
      */
-    virtual FileStream * DoFileStreamOpen(const str_t filePath, const sint32_t options, const uint32_t priority) = 0;
+    virtual FwFileStream * DoFileStreamOpen(const str_t filePath, const sint32_t options, const uint32_t priority) = 0;
 
     /**
      * @brief 基準となるパスをセット
@@ -106,13 +106,13 @@ protected:
     /**
      * @brief コンストラクタ
      */
-    FileManager() {
+    FwFileManager() {
     }
 
     /**
      * @brief デストラクタ
      */
-    virtual ~FileManager() {
+    virtual ~FwFileManager() {
     }
 };
 
@@ -121,7 +121,7 @@ protected:
  * @param[in]   desc      詳細
  * @param[in]   allocator 内部使用するアロケータを指定。nullptrならDefaultAllocatorを使用
  */
-FW_DLL_FUNC FileManager * CreateFileManager(FileManagerDesc * desc);
+FW_DLL_FUNC FwFileManager * CreateFileManager(FwFileManagerDesc * desc);
 
 END_NAMESPACE_FW
 

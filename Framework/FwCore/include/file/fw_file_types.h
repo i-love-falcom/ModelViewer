@@ -8,9 +8,9 @@
 BEGIN_NAMESPACE_FW
 
 /**
- * @enum FileOptionBits
+ * @enum FwFileOptionBits
  */
-enum FileOptionBits {
+enum FwFileOptionBits : uint32_t {
     kFileOptAccessReadShiftBits,
     kFileOptAccessWriteShiftBites,
 
@@ -30,9 +30,9 @@ enum FileOptionBits {
 };
 
 /**
- * @enum FileOptions
+ * @enum FwFileOptions
  */
-enum FileOptions {
+enum FwFileOptions : uint32_t {
     kFileOptAccessRead          = BIT32(kFileOptAccessReadShiftBits),           ///< 読み込みアクセス
     kFileOptAccessWrite         = BIT32(kFileOptAccessWriteShiftBites),         ///< 書き込みアクセス
     kFileOptAccessRW            = (kFileOptAccessRead | kFileOptAccessWrite),   ///< 読み書きマスク
@@ -58,18 +58,18 @@ enum FileOptions {
 };
 
 /**
- * @enum SreamSeekOrigin
+ * @enum FwSeekOrigin
  */
-enum SeekOrigin {
+enum FwSeekOrigin {
     kSeekOriginBegin = 0,  ///< 先頭
     kSeekOriginCurrent,    ///< 現在位置
     kSeekOriginEnd         ///< 末尾
 };
 
 /**
- * @enum FilePriority
+ * @enum FwFilePriority
  */
-enum FilePriority {
+enum FwFilePriority {
     kFilePriorityMin            = 256,
     kFilePriorityMax            = 1024,
     
@@ -83,9 +83,9 @@ enum FilePriority {
 };
 
 /**
- * @enum StdFileHandle
+ * @enum FwStdDeviceHandle
  */
-enum StdDeviceHandle {
+enum FwStdDeviceHandle {
     kStdInputDeviceHandle,      ///< 標準入力ハンドル
     kStdOutputDeviceHandle,     ///< 標準出力ハンドル
     kStdErrorDeviceHandle,      ///< 標準エラーハンドル
@@ -93,14 +93,14 @@ enum StdDeviceHandle {
 
 
 /**
- * @struct file_t
+ * @struct FwFile
  * @brief ファイルディスクリプタ
  */
-struct FW_DLL file_t {
+struct FW_DLL FwFile {
 #if defined(FW_PLATFORM_WIN32)
-    HANDLE      fileHandle;
+    HANDLE      nativeHandle;
 #else
-    FILE *      fileHandle;
+    FILE *      nativeHandle;
 #endif
     sint32_t    options;
 

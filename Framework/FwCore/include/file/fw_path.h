@@ -8,9 +8,9 @@
 BEGIN_NAMESPACE_FW
 
 /**
- * @class Path
+ * @class FwPath
  */
-class FW_DLL Path {
+class FW_DLL FwPath {
 public:
     enum {
         kMaxFNameLen    = 255,

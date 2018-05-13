@@ -68,16 +68,16 @@ static bool CheckValidPath(const str_t path) {
 static str_t AddPath(str_t buffer, const size_t numOfElements, const str_t path) {
     FwAssert(CheckValidPath(path));
 
-    if (Path::IsPathRooted(path)) {
+    if (FwPath::IsPathRooted(path)) {
         tstring::Copy(buffer, numOfElements, path);
     } else {
         const size_t bufferLen = tstring::Length(buffer);
 
         if (bufferLen + 2 <= numOfElements &&
-            buffer[bufferLen - 1] != Path::DirSeparator() &&
-            buffer[bufferLen - 1] != Path::AltDirSeparator() &&
-            buffer[bufferLen - 1] != Path::VolumeSeparator()) {
-            buffer[bufferLen]     = Path::DirSeparator();
+            buffer[bufferLen - 1] != FwPath::DirSeparator() &&
+            buffer[bufferLen - 1] != FwPath::AltDirSeparator() &&
+            buffer[bufferLen - 1] != FwPath::VolumeSeparator()) {
+            buffer[bufferLen]     = FwPath::DirSeparator();
             buffer[bufferLen + 1] = _T('\0');
         }
         tstring::Concat(buffer, numOfElements, path);
@@ -87,39 +87,39 @@ static str_t AddPath(str_t buffer, const size_t numOfElements, const str_t path)
 
 END_NAMESPACE_NONAME
 
-const char_t Path::DirSeparator() {
+const char_t FwPath::DirSeparator() {
     return _T('\\');
 }
 
-const char_t Path::AltDirSeparator() {
+const char_t FwPath::AltDirSeparator() {
     return _T('/');
 }
 
-const char_t Path::PathSeparator() {
+const char_t FwPath::PathSeparator() {
     return _T(';');
 }
 
-const char_t Path::VolumeSeparator() {
+const char_t FwPath::VolumeSeparator() {
     return _T(':');
 }
 
-const char_t * Path::GetInvalidFileNameChars() {
+const char_t * FwPath::GetInvalidFileNameChars() {
     return s_invalidFileNameChars;
 }
 
-size_t Path::GetNumInvalidFileNameChars() {
+size_t FwPath::GetNumInvalidFileNameChars() {
     return ARRAY_SIZEOF(s_invalidFileNameChars);
 }
 
-const char_t * Path::GetInvalidPathChars() {
+const char_t * FwPath::GetInvalidPathChars() {
     return s_invalidPathChars;
 }
 
-size_t Path::GetNumInvalidPathChars() {
+size_t FwPath::GetNumInvalidPathChars() {
     return ARRAY_SIZEOF(s_invalidPathChars);
 }
 
-str_t Path::GetUserDir(str_t buffer, const size_t numOfElements) {
+str_t FwPath::GetUserDir(str_t buffer, const size_t numOfElements) {
     if (numOfElements >= MAX_PATH) {
         HRESULT hr = SHGetFolderPath(NULL, CSIDL_MYDOCUMENTS, NULL, SHGFP_TYPE_CURRENT, buffer);
         FwAssert(hr == S_OK);
@@ -140,7 +140,7 @@ str_t Path::GetUserDir(str_t buffer, const size_t numOfElements) {
     return buffer;
 }
 
-str_t Path::GetTempDir(str_t buffer, const size_t numOfElements) {
+str_t FwPath::GetTempDir(str_t buffer, const size_t numOfElements) {
     size_t num = ::GetTempPath((DWORD)numOfElements, buffer);
 
     // DirSeparatorで終わらないなら付加する
@@ -151,7 +151,7 @@ str_t Path::GetTempDir(str_t buffer, const size_t numOfElements) {
     return buffer;
 }
 
-str_t Path::GetCurrentDir(str_t buffer, const size_t numOfElements) {
+str_t FwPath::GetCurrentDir(str_t buffer, const size_t numOfElements) {
     size_t num = ::GetCurrentDirectory((DWORD)numOfElements, buffer);
 
     // DirSeparatorで終わらないなら付加する
@@ -186,7 +186,7 @@ private:
 };
 END_NAMESPACE_NONAME
 
-str_t Path::Normalize(str_t buffer, const size_t numOfElements, const str_t path) {
+str_t FwPath::Normalize(str_t buffer, const size_t numOfElements, const str_t path) {
     const size_t pathLen = Min(numOfElements, tstring::Length(path));
 
     size_t srcIdx = 0;
@@ -197,8 +197,8 @@ str_t Path::Normalize(str_t buffer, const size_t numOfElements, const str_t path
         buffer[dstIdx++] = path[srcIdx++];
     } else if (pathLen >= 3 &&
         (_T('a') <= path[srcIdx] && path[srcIdx] <= _T('z')) || (_T('A') <= path[srcIdx] && path[srcIdx] <= _T('Z')) &&
-        (path[srcIdx + 1] == Path::VolumeSeparator()) &&
-        (path[srcIdx + 2] == Path::DirSeparator() || path[srcIdx + 2] == AltDirSeparator())) {
+        (path[srcIdx + 1] == FwPath::VolumeSeparator()) &&
+        (path[srcIdx + 2] == FwPath::DirSeparator() || path[srcIdx + 2] == AltDirSeparator())) {
         buffer[dstIdx++] = path[srcIdx++];
         buffer[dstIdx++] = path[srcIdx++];
         buffer[dstIdx++] = path[srcIdx++];
@@ -206,18 +206,18 @@ str_t Path::Normalize(str_t buffer, const size_t numOfElements, const str_t path
     
     // @todo sjis/unicode対応
 
-    Stack<size_t, Path::kMaxPathLen> dirSepStack;
+    Stack<size_t, FwPath::kMaxPathLen> dirSepStack;
     
     // Rootの位置を積んでおく
     dirSepStack.push(dstIdx);
     
     size_t tmpPathLen = 0;
-    char_t tmpPath[Path::kMaxPathLen];
+    char_t tmpPath[FwPath::kMaxPathLen];
     while (srcIdx < pathLen) {
         buffer[dstIdx++] = path[srcIdx];
         tmpPath[tmpPathLen++] = path[srcIdx];
         
-        if (path[srcIdx] == Path::DirSeparator() || path[srcIdx] == Path::AltDirSeparator()) {
+        if (path[srcIdx] == FwPath::DirSeparator() || path[srcIdx] == FwPath::AltDirSeparator()) {
             if (tmpPathLen == 2 && tmpPath[0] == _T('.')) {
                 // _T('.')は一つ戻る
                 dstIdx = dirSepStack.pop();
@@ -236,15 +236,15 @@ str_t Path::Normalize(str_t buffer, const size_t numOfElements, const str_t path
 
     // AltDirSeparatorをDirSeparatorに置き換え
     for (size_t i = 0; i < pathLen; ++i) {
-        if (buffer[i] == Path::AltDirSeparator()) {
-            buffer[i] = Path::DirSeparator();
+        if (buffer[i] == FwPath::AltDirSeparator()) {
+            buffer[i] = FwPath::DirSeparator();
         }
     }
 
     return buffer;
 }
 
-str_t Path::Combine(str_t buffer, const size_t numOfElements, const str_t path1, const str_t path2) {
+str_t FwPath::Combine(str_t buffer, const size_t numOfElements, const str_t path1, const str_t path2) {
     FwAssert(buffer != nullptr);
     FwAssert(numOfElements > 0);
 
@@ -254,7 +254,7 @@ str_t Path::Combine(str_t buffer, const size_t numOfElements, const str_t path1,
     return buffer;
 }
 
-str_t Path::Combine(str_t buffer, const size_t numOfElements, const str_t path1, const str_t path2, const str_t path3) {
+str_t FwPath::Combine(str_t buffer, const size_t numOfElements, const str_t path1, const str_t path2, const str_t path3) {
     FwAssert(buffer != nullptr);
     FwAssert(numOfElements > 0);
 
@@ -265,7 +265,7 @@ str_t Path::Combine(str_t buffer, const size_t numOfElements, const str_t path1,
     return buffer;
 }
 
-str_t Path::Combine(str_t buffer, const size_t numOfElements, const str_t path1, const str_t path2, const str_t path3, const str_t path4) {
+str_t FwPath::Combine(str_t buffer, const size_t numOfElements, const str_t path1, const str_t path2, const str_t path3, const str_t path4) {
     FwAssert(buffer != nullptr);
     FwAssert(numOfElements > 0);
 
@@ -285,7 +285,7 @@ str_t Combine(str_t buffer, const size_t numOfElements, const str_t * paths, con
     return buffer;
 }
 
-str_t Path::MakeTempFileName(str_t buffer, const size_t numOfElements, const str_t name, const uint32_t index) {
+str_t FwPath::MakeTempFileName(str_t buffer, const size_t numOfElements, const str_t name, const uint32_t index) {
     FwAssert(buffer != nullptr);
     FwAssert(numOfElements > 0);
     FwAssert(name != nullptr);
@@ -295,7 +295,7 @@ str_t Path::MakeTempFileName(str_t buffer, const size_t numOfElements, const str
     return buffer;
 }
 
-str_t Path::MakeTempFileNameWithDir(str_t buffer, const size_t numOfElements, const str_t name) {
+str_t FwPath::MakeTempFileNameWithDir(str_t buffer, const size_t numOfElements, const str_t name) {
     FwAssert(buffer != nullptr);
     FwAssert(numOfElements > 0);
     FwAssert(name != nullptr);
@@ -308,7 +308,7 @@ str_t Path::MakeTempFileNameWithDir(str_t buffer, const size_t numOfElements, co
     return buffer;
 }
 
-str_t Path::MakeTempFileNameWithDir(str_t buffer, const size_t numOfElements, const str_t name, const uint32_t index) {
+str_t FwPath::MakeTempFileNameWithDir(str_t buffer, const size_t numOfElements, const str_t name, const uint32_t index) {
     FwAssert(buffer != nullptr);
     FwAssert(numOfElements > 0);
     FwAssert(name != nullptr);
@@ -321,7 +321,7 @@ str_t Path::MakeTempFileNameWithDir(str_t buffer, const size_t numOfElements, co
     return buffer;
 }
 
-str_t Path::GetDirName(str_t buffer, const size_t numOfElements, const str_t path) {
+str_t FwPath::GetDirName(str_t buffer, const size_t numOfElements, const str_t path) {
     FwAssert(buffer != nullptr);
     FwAssert(numOfElements > 0);
     FwAssert(CheckValidPath(path));
@@ -361,7 +361,7 @@ str_t Path::GetDirName(str_t buffer, const size_t numOfElements, const str_t pat
     return buffer;
 }
     
-str_t Path::GetFileName(str_t buffer, const size_t numOfElements, const str_t path) {
+str_t FwPath::GetFileName(str_t buffer, const size_t numOfElements, const str_t path) {
     FwAssert(buffer != nullptr);
     FwAssert(numOfElements > 0);
     FwAssert(CheckValidPath(path));
@@ -392,7 +392,7 @@ str_t Path::GetFileName(str_t buffer, const size_t numOfElements, const str_t pa
     return buffer;
 }
     
-str_t Path::GetExtension(str_t buffer, const size_t numOfElements, const str_t path) {
+str_t FwPath::GetExtension(str_t buffer, const size_t numOfElements, const str_t path) {
     FwAssert(buffer != nullptr);
     FwAssert(numOfElements > 0);
     FwAssert(CheckValidPath(path));
@@ -434,7 +434,7 @@ str_t Path::GetExtension(str_t buffer, const size_t numOfElements, const str_t p
     return buffer;
 }
     
-str_t Path::GetFileNameWithoutExtension(str_t buffer, const size_t numOfElements, const str_t path) {
+str_t FwPath::GetFileNameWithoutExtension(str_t buffer, const size_t numOfElements, const str_t path) {
     FwAssert(buffer != nullptr);
     FwAssert(numOfElements > 0);
     FwAssert(CheckValidPath(path));
@@ -482,7 +482,7 @@ str_t Path::GetFileNameWithoutExtension(str_t buffer, const size_t numOfElements
     return buffer;
 }
 
-str_t Path::GetPathRoot(str_t buffer, const size_t numOfElements, const str_t path) {
+str_t FwPath::GetPathRoot(str_t buffer, const size_t numOfElements, const str_t path) {
     FwAssert(buffer != nullptr);
     FwAssert(numOfElements > 0);
     FwAssert(CheckValidPath(path));
@@ -508,7 +508,7 @@ str_t Path::GetPathRoot(str_t buffer, const size_t numOfElements, const str_t pa
     return buffer;
 }
 
-str_t Path::ChangeExtension(str_t buffer, const size_t numOfElements, const str_t path, const str_t extension) {
+str_t FwPath::ChangeExtension(str_t buffer, const size_t numOfElements, const str_t path, const str_t extension) {
     GetFileNameWithoutExtension(buffer, numOfElements, path);
     FwAssert(CheckValidPath(path));
     FwAssert(CheckValidFileName(extension));
@@ -521,7 +521,7 @@ str_t Path::ChangeExtension(str_t buffer, const size_t numOfElements, const str_
     return buffer;
 }
 
-bool Path::HasExtension(const str_t path) {
+bool FwPath::HasExtension(const str_t path) {
     FwAssert(CheckValidPath(path));
 
     const size_t pathLen = tstring::Length(path);
@@ -553,7 +553,7 @@ bool Path::HasExtension(const str_t path) {
     return true;
 }
 
-bool Path::IsPathRooted(const str_t path) {
+bool FwPath::IsPathRooted(const str_t path) {
     FwAssert(CheckValidPath(path));
 
     if ((path[0] == DirSeparator()) || 

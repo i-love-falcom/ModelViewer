@@ -15,7 +15,7 @@ BEGIN_NAMESPACE_FW
 /**
 * @class FileStream
 */
-class FileStream : public NonCopyable<FileStream> {
+class FwFileStream : public NonCopyable<FwFileStream> {
 public:
     /**
      * @brief ストリームを閉じて自身を破棄
@@ -48,7 +48,7 @@ public:
     /**
      * @brief ファイルの位置を移動する
      */
-    FW_INLINE void Seek(const sint64_t offset, const SeekOrigin origin) {
+    FW_INLINE void Seek(const sint64_t offset, const FwSeekOrigin origin) {
         return DoSeek(offset, origin);
     }
 
@@ -62,8 +62,8 @@ public:
     /**
      * @brief 実行中の処理が完了するまで待つ
      */
-    FW_INLINE sint32_t SubmitDone(const uint32_t milliseconds = FW_WAIT_INFINITE) {
-        return DoSubmitDone(milliseconds);
+    FW_INLINE sint32_t Wait(const uint32_t milliseconds = FW_WAIT_INFINITE) {
+        return DoWait(milliseconds);
     }
 
     /**
@@ -98,7 +98,7 @@ protected:
     /**
      * @brief ファイルの位置を移動する
      */
-    virtual void DoSeek(const sint64_t offset, const SeekOrigin origin) = 0;
+    virtual void DoSeek(const sint64_t offset, const FwSeekOrigin origin) = 0;
 
     /** 
      * @brief 処理を送出する
@@ -108,24 +108,24 @@ protected:
     /**
      * @brief 実行中のジョブが完了するまで待つ
      */
-    virtual sint32_t DoSubmitDone(const uint32_t milliseconds) = 0;
+    virtual sint32_t DoWait(const uint32_t milliseconds) = 0;
 
 
     /**
      * @brief コンストラクタ
      */
-    FileStream() {
+    FwFileStream() {
         fileName[0] = _T('\0');
     }
 
     /**
      * @brief デストラクタ
      */
-    virtual ~FileStream() {
+    virtual ~FwFileStream() {
     }
 
 
-    char_t  fileName[Path::kMaxFNameLen];
+    char_t  fileName[FwPath::kMaxFNameLen];
 };
 
 END_NAMESPACE_FW

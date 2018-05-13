@@ -17,20 +17,20 @@ BEGIN_NAMESPACE_FW
  * @param[in]      options      FileOptionsを論理和したもの
  * @param[in, out] fp           ファイルディスクリプタ
  */
-FW_DLL_FUNC sint32_t FileOpen(const str_t name, const sint32_t options, file_t & fp);
+FW_DLL_FUNC sint32_t FwFileOpen(const str_t name, const sint32_t options, FwFile & fp);
 
 /**
  * @brief ファイルを閉じる
  * @param[in] fp ファイルディスクリプタ
  */
-FW_DLL_FUNC sint32_t FileClose(file_t & fp);
+FW_DLL_FUNC sint32_t FwFileClose(FwFile & fp);
 
 /**
  * @brief ファイルを削除
  * @param[in] relativePath 相対パス
  * @param[in] fileName     ファイル名
  */
-FW_DLL_FUNC sint32_t FileDelete(const str_t fileName);
+FW_DLL_FUNC sint32_t FwFileDelete(const str_t fileName);
 
 /**
  * @brief ファイルを読み込む
@@ -39,7 +39,7 @@ FW_DLL_FUNC sint32_t FileDelete(const str_t fileName);
  * @param[in]  toReadSize   読み込みサイズ
  * @param[out] readSize     読み込まれたサイズを格納する変数へのポインタ
  */
-FW_DLL_FUNC sint32_t FileRead(file_t & fp, void * dst, const uint64_t toReadSize, uint64_t * readSize);
+FW_DLL_FUNC sint32_t FwFileRead(FwFile & fp, void * dst, const uint64_t toReadSize, uint64_t * readSize);
 
 /**
  * @brief ファイルへ書き込む
@@ -48,7 +48,7 @@ FW_DLL_FUNC sint32_t FileRead(file_t & fp, void * dst, const uint64_t toReadSize
  * @param[in] toWriteSize 書き込みサイズ
  * @param[in] writeSize   書き込まれたサイズを格納する変数へのポインタ
  */
-FW_DLL_FUNC sint32_t FileWrite(file_t & fp, const void * src, const uint64_t toWriteSize, uint64_t * writeSize);
+FW_DLL_FUNC sint32_t FwFileWrite(FwFile & fp, const void * src, const uint64_t toWriteSize, uint64_t * writeSize);
 
 /**
  * @brief ファイルのサイズを取得する
@@ -56,14 +56,14 @@ FW_DLL_FUNC sint32_t FileWrite(file_t & fp, const void * src, const uint64_t toW
  * @param[in]  fileName     ファイル名
  * @param[out] length       byte単位の長さ
  */
-FW_DLL_FUNC sint32_t GetFileLength(const str_t name, uint64_t * length);
+FW_DLL_FUNC sint32_t FwFileGetLength(const str_t name, uint64_t * length);
 
 /**
  * @brief ファイルが存在するか調べる
  * @param[in] relativePath 相対パス
  * @param[in] fileName     ファイル名
  */
-FW_DLL_FUNC bool IsFileExist(const str_t name);
+FW_DLL_FUNC bool FwFileIsExist(const str_t name);
 
 /**
  * @brief ファイルポインタを移動する
@@ -71,44 +71,44 @@ FW_DLL_FUNC bool IsFileExist(const str_t name);
  * @param[in] offset 基準位置からのオフセット
  * @param[in] origin 基準位置
  */
-FW_DLL_FUNC sint32_t FileSeek(file_t & fp, const sint64_t offset, const SeekOrigin origin);
+FW_DLL_FUNC sint32_t FwFileSeek(FwFile & fp, const sint64_t offset, const FwSeekOrigin origin);
 
 /**
  * @brief キャッシュされたデータをフラッシュする
  * @param[in] fp ファイルディスクリプタ
  */
-FW_DLL_FUNC sint32_t FlushFileBuffer(file_t & fp);
+FW_DLL_FUNC sint32_t FwFileFlushBuffer(FwFile & fp);
 
 
 /**
  * @brief 標準入出力デバイスハンドルを取得
  */
-FW_DLL_FUNC file_t GetStdFileHandle(const StdDeviceHandle handle);
+FW_DLL_FUNC FwFile FwFileGetStdFileHandle(const FwStdDeviceHandle handle);
 
 
 /**
- * @class FileHolder
+ * @class FwFileHolder
  */
-class FileHolder {
+class FwFileHolder {
 public:
-    FW_INLINE file_t & Get() {
+    FW_INLINE FwFile & Get() {
         return fp_;
     }
 
-    FW_INLINE const file_t & Get() const {
+    FW_INLINE const FwFile & Get() const {
         return fp_;
     }
     
-    FileHolder(file_t & fp)
+    FwFileHolder(FwFile & fp)
     : fp_(fp) {
     }
 
-    ~FileHolder() {
-        FileClose(fp_);
+    ~FwFileHolder() {
+        FwFileClose(fp_);
     }
 
 private:
-    file_t fp_;
+    FwFile fp_;
 };
 
 END_NAMESPACE_FW

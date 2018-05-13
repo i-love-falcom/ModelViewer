@@ -9,7 +9,7 @@
 
 BEGIN_NAMESPACE_FW
 
-sint32_t FileOpen(const str_t name, const sint32_t options, file_t & fp) {
+sint32_t FwFileOpen(const str_t name, const sint32_t options, FwFile & fp) {
     if (name == nullptr || (options & kFileOptAccessMask) == 0) {
         return ERR_INVALID_PARMS;
     }
@@ -85,20 +85,20 @@ sint32_t FileOpen(const str_t name, const sint32_t options, file_t & fp) {
         return ERR_INVALID;
     }
 
-    fp.fileHandle = hFile;
+    fp.nativeHandle = hFile;
     fp.options = options;
     
     return FW_OK;
 }
 
-sint32_t FileClose(file_t & fp) {
-    if (fp.fileHandle == nullptr) {
+sint32_t FwFileClose(FwFile & fp) {
+    if (fp.nativeHandle == nullptr) {
         return ERR_INVALID_PARMS;
     }
     if ((fp.options & kFileOptFlagNoClose) == 0) {
-        HANDLE hFile = fp.fileHandle;
+        HANDLE hFile = fp.nativeHandle;
 
-        fp.fileHandle = nullptr;
+        fp.nativeHandle = nullptr;
         fp.options = 0;
 
         CloseHandle(hFile);
@@ -106,7 +106,7 @@ sint32_t FileClose(file_t & fp) {
     return FW_OK;
 }
 
-sint32_t FileDelete(const str_t name) {
+sint32_t FwFileDelete(const str_t name) {
     if (name == nullptr) {
         return ERR_INVALID_PARMS;
     }
@@ -116,8 +116,8 @@ sint32_t FileDelete(const str_t name) {
     return FW_OK;
 }
 
-sint32_t FileRead(file_t & fp, void * dst, const uint64_t toReadSize, uint64_t * readSize) {
-    if (fp.fileHandle == nullptr || dst == nullptr || toReadSize == 0) {
+sint32_t FwFileRead(FwFile & fp, void * dst, const uint64_t toReadSize, uint64_t * readSize) {
+    if (fp.nativeHandle == nullptr || dst == nullptr || toReadSize == 0) {
         return ERR_INVALID_PARMS;
     }
     
@@ -127,7 +127,7 @@ sint32_t FileRead(file_t & fp, void * dst, const uint64_t toReadSize, uint64_t *
         DWORD readSize = static_cast<DWORD>((toReadSize - readOffset) & 0xffffffff);
 
         DWORD numReads = 0;
-        BOOL r = ReadFile(fp.fileHandle, dstBuffer, readSize, &numReads, NULL);
+        BOOL r = ReadFile(fp.nativeHandle, dstBuffer, readSize, &numReads, NULL);
         if (!r) {
             return ERR_INVALID;
         }
@@ -146,8 +146,8 @@ sint32_t FileRead(file_t & fp, void * dst, const uint64_t toReadSize, uint64_t *
     return FW_OK;
 }
 
-sint32_t FileWrite(file_t & fp, const void * src, const uint64_t toWriteSize, uint64_t * writeSize) {
-    if (fp.fileHandle == nullptr || src == nullptr || toWriteSize == 0) {
+sint32_t FwFileWrite(FwFile & fp, const void * src, const uint64_t toWriteSize, uint64_t * writeSize) {
+    if (fp.nativeHandle == nullptr || src == nullptr || toWriteSize == 0) {
         return ERR_INVALID_PARMS;
     }
     
@@ -157,7 +157,7 @@ sint32_t FileWrite(file_t & fp, const void * src, const uint64_t toWriteSize, ui
         DWORD writeSize = static_cast<DWORD>((toWriteSize - writeOffset) & 0xffffffff);
 
         DWORD numWrites = 0;
-        BOOL r = WriteFile(fp.fileHandle, srcBuffer, writeSize, &numWrites, NULL);
+        BOOL r = WriteFile(fp.nativeHandle, srcBuffer, writeSize, &numWrites, NULL);
         if (!r) {
             return ERR_INVALID;
         }
@@ -173,7 +173,7 @@ sint32_t FileWrite(file_t & fp, const void * src, const uint64_t toWriteSize, ui
     return FW_OK;
 }
 
-sint32_t GetFileLength(const str_t name, uint64_t * length) {
+sint32_t FwFileGetLength(const str_t name, uint64_t * length) {
     if (length == nullptr) {
         return ERR_INVALID_PARMS;
     }
@@ -202,7 +202,7 @@ sint32_t GetFileLength(const str_t name, uint64_t * length) {
     return FW_OK;
 }
 
-bool IsFileExist(const str_t name) {
+bool FwFileIsExist(const str_t name) {
     if (name == nullptr) {
         return false;
     }
@@ -224,8 +224,8 @@ bool IsFileExist(const str_t name) {
     return true;
 }
 
-sint32_t FileSeek(file_t & fp, const sint64_t offset, const SeekOrigin origin) {
-    if (fp.fileHandle == nullptr) {
+sint32_t FwFileSeek(FwFile & fp, const sint64_t offset, const FwSeekOrigin origin) {
+    if (fp.nativeHandle == nullptr) {
         return ERR_INVALID_PARMS;
     }
     
@@ -233,30 +233,30 @@ sint32_t FileSeek(file_t & fp, const sint64_t offset, const SeekOrigin origin) {
     liDistanceToMove.QuadPart = offset;
     
     uint32_t oriTbl[] = {FILE_BEGIN, FILE_CURRENT, FILE_END};
-    SetFilePointerEx(fp.fileHandle, liDistanceToMove, NULL, oriTbl[origin]);
+    SetFilePointerEx(fp.nativeHandle, liDistanceToMove, NULL, oriTbl[origin]);
     
     return FW_OK;
 }
 
-sint32_t FlushFileBuffer(file_t & fp) {
-    if (fp.fileHandle == nullptr) {
+sint32_t FwFileFlushBuffer(FwFile & fp) {
+    if (fp.nativeHandle == nullptr) {
         return ERR_INVALID_PARMS;
     }
     
-    FlushFileBuffers(fp.fileHandle);
+    FlushFileBuffers(fp.nativeHandle);
     
     return 0;
 }
 
-file_t GetStdFileHandle(const StdDeviceHandle handle) {
-    file_t fp;
+FwFile FwFileGetStdFileHandle(const FwStdDeviceHandle handle) {
+    FwFile fp;
     fp.options |= kFileOptFlagNoClose;
 
 #if defined(FW_PLATFORM_WIN32)
     switch (handle) {
-    case kStdInputDeviceHandle:    fp.fileHandle = GetStdHandle(STD_INPUT_HANDLE); break;
-    case kStdOutputDeviceHandle:   fp.fileHandle = GetStdHandle(STD_OUTPUT_HANDLE); break;
-    case kStdErrorDeviceHandle:    fp.fileHandle = GetStdHandle(STD_ERROR_HANDLE); break;
+    case kStdInputDeviceHandle:    fp.nativeHandle = GetStdHandle(STD_INPUT_HANDLE); break;
+    case kStdOutputDeviceHandle:   fp.nativeHandle = GetStdHandle(STD_OUTPUT_HANDLE); break;
+    case kStdErrorDeviceHandle:    fp.nativeHandle = GetStdHandle(STD_ERROR_HANDLE); break;
     }
 #else
     switch (handle) {

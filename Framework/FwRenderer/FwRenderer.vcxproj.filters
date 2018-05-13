@@ -13,6 +13,12 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="source files\renderer">
+      <UniqueIdentifier>{e8fed712-a3ae-48e4-af1f-399e1e972046}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="header files\renderer">
+      <UniqueIdentifier>{dcd1c54d-6f37-451f-b34d-071ae4b0eeda}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="source\fw_renderer.cpp">
