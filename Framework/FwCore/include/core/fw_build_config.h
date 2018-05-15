@@ -9,5 +9,7 @@
 //! FwThread の内部実装を強制的に std::thread にする
 #define FW_BUILD_CONFIG_FORCE_USE_STD_THREAD            (0)
 
+//! ファイル操作の内部実装を強制的に標準C関数にする
+#define FW_BUILD_CONFIG_FORCE_USE_LIBC_FILE             (0)
 
 #endif  // FW_BUILD_CONFIG_H_

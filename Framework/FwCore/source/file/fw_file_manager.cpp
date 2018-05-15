@@ -138,9 +138,9 @@ public:
     FwFile      fileHandle;
     uint32_t    priority;
 
-    sint64_t    seekOffset;
-    FwSeekOrigin  seekOrigin;
-    bool        updateFileSeek;
+    sint64_t        seekOffset;
+    FwSeekOrigin    seekOrigin;
+    bool            updateFileSeek;
 
     vector<FwFileIOCommand>   localBuffer;
     FwFileIONotification      finishNotification;
@@ -160,7 +160,7 @@ public:
     // ファイルの長さを取得
     virtual uint64_t DoLength() FW_OVERRIDE {
         uint64_t fileLength = 0;
-        FwFileGetLength(filePath, &fileLength);
+        FwFileGetLength(fileHandle, &fileLength);
 
         return fileLength;
     }

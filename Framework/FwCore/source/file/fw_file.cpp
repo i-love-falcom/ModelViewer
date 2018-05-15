@@ -9,11 +9,12 @@
 
 BEGIN_NAMESPACE_FW
 
-sint32_t FwFileOpen(const str_t name, const sint32_t options, FwFile & fp) {
+sint32_t FwFileOpen(const str_t name, const uint32_t options, FwFile & fp) {
     if (name == nullptr || (options & kFileOptAccessMask) == 0) {
         return ERR_INVALID_PARMS;
     }
     
+#if FW_FILE == FW_FILE_WIN32
     DWORD desiredAccess = 0;
     DWORD sharedModel = 0;
     DWORD creationDisposition = 0;
@@ -72,7 +73,7 @@ sint32_t FwFileOpen(const str_t name, const sint32_t options, FwFile & fp) {
         flagsAndAttr |= FILE_ATTRIBUTE_NORMAL;
     }
 
-    HANDLE hFile = CreateFile(
+    auto nativeHandle = CreateFile(
         name,
         desiredAccess,
         sharedModel,
@@ -81,13 +82,41 @@ sint32_t FwFileOpen(const str_t name, const sint32_t options, FwFile & fp) {
         flagsAndAttr,
         NULL);
     
-    if (hFile == INVALID_HANDLE_VALUE) {
+    if (nativeHandle == INVALID_HANDLE_VALUE) {
         return ERR_INVALID;
     }
+#else
+    tstring opt;
 
-    fp.nativeHandle = hFile;
+    if ((options & kFileOptAccessRW) == kFileOptAccessRW) {
+        opt += _T("a+b");
+    } else if ((options & kFileOptAccessRead) != 0) {
+        opt += _T("rb");
+    } else if ((options & kFileOptAccessWrite) != 0) {
+        opt += _T("w+b");
+    }
+    if ((options & kFileOptFlagRandomAccess) != 0) {
+        opt += _T("R");
+    } else if ((options & kFileOptFlagSequential) != 0) {
+        opt += _T("S");
+    }
+    if ((options & kFileOptFlagDeleteOnClose) != 0) {
+        opt += _T("D");
+    }
+    if ((options & kFileOptAttributeTemporary) != 0) {
+        opt += _T("T");
+    }
+
+    FILE * nativeHandle = nullptr;
+    auto errorNo = _tfopen_s(&nativeHandle, name, opt.c_str());
+    if (errorNo != 0) {
+        return ERR_INVALID;
+    }
+#endif
+
+    fp.nativeHandle = nativeHandle;
     fp.options = options;
-    
+
     return FW_OK;
 }
 
@@ -96,12 +125,16 @@ sint32_t FwFileClose(FwFile & fp) {
         return ERR_INVALID_PARMS;
     }
     if ((fp.options & kFileOptFlagNoClose) == 0) {
-        HANDLE hFile = fp.nativeHandle;
+        auto nativeHandle = fp.nativeHandle;
 
         fp.nativeHandle = nullptr;
         fp.options = 0;
 
-        CloseHandle(hFile);
+#if FW_FILE == FW_FILE_WIN32
+        CloseHandle(nativeHandle);
+#else
+        fclose(nativeHandle);
+#endif
     }
     return FW_OK;
 }
@@ -110,9 +143,15 @@ sint32_t FwFileDelete(const str_t name) {
     if (name == nullptr) {
         return ERR_INVALID_PARMS;
     }
+#if FW_FILE == FW_FILE_WIN32
     if (::DeleteFile(name) != 0) {
         return ERR_FAILED;
     }
+#else
+    if (_tremove(name) != 0) {
+        return ERR_FAILED;
+    }
+#endif
     return FW_OK;
 }
 
@@ -122,7 +161,8 @@ sint32_t FwFileRead(FwFile & fp, void * dst, const uint64_t toReadSize, uint64_t
     }
     
     uint64_t readOffset = 0;
-    while (true) {
+#if FW_FILE == FW_FILE_WIN32
+    for (;;) {
         void * dstBuffer = reinterpret_cast<void *>(reinterpret_cast<uintptr_t>(dst) + readOffset);
         DWORD readSize = static_cast<DWORD>((toReadSize - readOffset) & 0xffffffff);
 
@@ -138,11 +178,25 @@ sint32_t FwFileRead(FwFile & fp, void * dst, const uint64_t toReadSize, uint64_t
         }
     }
     if (readSize != nullptr) {
-        *readSize = static_cast<uint64_t>(readOffset);
+        *readSize = readOffset;
     }
     if (readOffset == 0) {
         return ERR_EOF;
     }
+#else
+    size_t numReads = fread(dst, 1, toReadSize, fp.nativeHandle);
+    if (numReads < toReadSize) {
+        if (ferror(fp.nativeHandle)) {
+            return ERR_INVALID;
+        }
+        if (numReads == 0 && feof(fp.nativeHandle)) {
+            return ERR_EOF;
+        }
+    }
+    if (readSize != nullptr) {
+        *readSize = numReads;
+    }
+#endif
     return FW_OK;
 }
 
@@ -152,7 +206,8 @@ sint32_t FwFileWrite(FwFile & fp, const void * src, const uint64_t toWriteSize, 
     }
     
     uint64_t writeOffset = 0;
-    while (true) {
+#if FW_FILE == FW_FILE_WIN32
+    for (;;) {
         const void * srcBuffer = reinterpret_cast<const void *>(reinterpret_cast<uintptr_t>(src) + writeOffset);
         DWORD writeSize = static_cast<DWORD>((toWriteSize - writeOffset) & 0xffffffff);
 
@@ -168,36 +223,64 @@ sint32_t FwFileWrite(FwFile & fp, const void * src, const uint64_t toWriteSize, 
         }
     }
     if (writeSize != nullptr) {
-        *writeSize = static_cast<uint64_t>(writeOffset);
+        *writeSize = writeOffset;
     }
+#elif FW_FILE == FW_FILE_LIBC
+    size_t numWrites = fwrite(src, 1, toWriteSize, fp.nativeHandle);
+    if (writeSize != nullptr) {
+        *writeSize = static_cast<uint64_t>(numWrites);
+    }
+#endif
     return FW_OK;
 }
 
-sint32_t FwFileGetLength(const str_t name, uint64_t * length) {
+sint32_t FwFileGetLengthByName(const str_t name, uint64_t * length) {
     if (length == nullptr) {
         return ERR_INVALID_PARMS;
     }
     
-    HANDLE hFile = CreateFile(
-        name,
-        0,
-        0,          // no share
-        nullptr,    // security attributes
-        OPEN_EXISTING,
-        FILE_ATTRIBUTE_NORMAL,
-        NULL);
-    
-    if (hFile == INVALID_HANDLE_VALUE) {
+    FwFile fp;
+    auto result = FwFileOpen(name, kFileOptAccessRead | kFileOptSharedRead, fp);
+    if (result != FW_OK) {
+        return result;
+    }
+
+    result = FwFileGetLength(fp, length);
+
+    FwFileClose(fp);
+
+    return result;
+}
+
+sint32_t FwFileGetLength(FwFile & fp, uint64_t * length) {
+    if (length == nullptr) {
+        return ERR_INVALID_PARMS;
+    }
+
+#if FW_FILE == FW_FILE_WIN32
+    if (fp.nativeHandle == INVALID_HANDLE_VALUE) {
         return ERR_INVALID;
     }
 
     LARGE_INTEGER len;
-    if (!GetFileSizeEx(hFile, &len)) {
+    if (!GetFileSizeEx(fp.nativeHandle, &len)) {
         return ERR_FILE_NOEXIST;
     }
     *length = static_cast<uint64_t>(len.QuadPart);
+#elif FW_FILE == FW_FILE_LIBC
+    if (fp.nativeHandle == nullptr) {
+        return ERR_INVALID;
+    }
 
-    CloseHandle(hFile);
+    fseek(fp.nativeHandle, 0, SEEK_END);
+
+    fpos_t len;
+    fgetpos(fp.nativeHandle, &len);
+
+    fseek(fp.nativeHandle, 0, SEEK_SET);
+
+    *length = static_cast<uint64_t>(len);
+#endif
 
     return FW_OK;
 }
@@ -207,20 +290,29 @@ bool FwFileIsExist(const str_t name) {
         return false;
     }
 
-    HANDLE hFile = CreateFile(
+#if FW_FILE == FW_FILE_WIN32
+    HANDLE nativeHandle = CreateFile(
         name,
         0,
-        0,          // no share
+        FILE_SHARE_READ,
         nullptr,    // security attributes
         OPEN_EXISTING,
         FILE_ATTRIBUTE_NORMAL,
         NULL);
     
-    if (hFile == INVALID_HANDLE_VALUE) {
+    if (nativeHandle == INVALID_HANDLE_VALUE) {
         return false;
     }
-    CloseHandle(hFile);
-    
+    CloseHandle(nativeHandle);
+#elif FW_FILE == FW_FILE_LIBC
+    FILE * nativeHandle = nullptr;
+    auto errorNo = _tfopen_s(&nativeHandle, name, _T("rb"));
+    if (errorNo != 0) {
+        return false;
+    }
+    fclose(nativeHandle);
+#endif
+
     return true;
 }
 
@@ -229,12 +321,17 @@ sint32_t FwFileSeek(FwFile & fp, const sint64_t offset, const FwSeekOrigin origi
         return ERR_INVALID_PARMS;
     }
     
+#if FW_FILE == FW_FILE_WIN32
     LARGE_INTEGER liDistanceToMove;
     liDistanceToMove.QuadPart = offset;
     
     uint32_t oriTbl[] = {FILE_BEGIN, FILE_CURRENT, FILE_END};
     SetFilePointerEx(fp.nativeHandle, liDistanceToMove, NULL, oriTbl[origin]);
-    
+#elif FW_FILE == FW_FILE_LIBC
+    int oriTbl[] = { SEEK_SET, SEEK_CUR, SEEK_END };
+    _fseeki64(fp.nativeHandle, 0, oriTbl[origin]);
+#endif
+
     return FW_OK;
 }
 
@@ -243,29 +340,13 @@ sint32_t FwFileFlushBuffer(FwFile & fp) {
         return ERR_INVALID_PARMS;
     }
     
+#if FW_FILE == FW_FILE_WIN32
     FlushFileBuffers(fp.nativeHandle);
-    
-    return 0;
-}
-
-FwFile FwFileGetStdFileHandle(const FwStdDeviceHandle handle) {
-    FwFile fp;
-    fp.options |= kFileOptFlagNoClose;
-
-#if defined(FW_PLATFORM_WIN32)
-    switch (handle) {
-    case kStdInputDeviceHandle:    fp.nativeHandle = GetStdHandle(STD_INPUT_HANDLE); break;
-    case kStdOutputDeviceHandle:   fp.nativeHandle = GetStdHandle(STD_OUTPUT_HANDLE); break;
-    case kStdErrorDeviceHandle:    fp.nativeHandle = GetStdHandle(STD_ERROR_HANDLE); break;
-    }
-#else
-    switch (handle) {
-    case kStdInputDeviceHandle:    fp.fileHandle = stdin; break;
-    case kStdOutputDeviceHandle:   fp.fileHandle = stdout; break;
-    case kStdErrorDeviceHandle:    fp.fileHandle = stderr; break;
-    }
+#elif FW_FILE == FW_FILE_LIBC
+    fflush(fp.nativeHandle);
 #endif
-    return fp;
+
+    return FW_OK;
 }
 
 END_NAMESPACE_FW

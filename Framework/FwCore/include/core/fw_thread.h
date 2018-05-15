@@ -9,14 +9,12 @@
 #define FW_THREAD_STL           (1)
 #define FW_THREAD_WIN32         (2)
 
-#if defined(FW_PLATFORM_WIN32)
-    #if FW_BUILD_CONFIG_FORCE_USE_STD_THREAD
-    #define FW_THREAD           FW_THREAD_STL
-    #else
-    #define FW_THREAD           FW_THREAD_WIN32
-    #endif
+#if FW_BUILD_CONFIG_FORCE_USE_STD_THREAD
+#define FW_THREAD           FW_THREAD_STL
+#elif defined(FW_PLATFORM_WIN32)
+#define FW_THREAD           FW_THREAD_WIN32
 #else
-#define FW_THREAD               FW_THREAD_STL
+#define FW_THREAD           FW_THREAD_STL
 #endif
 
 #if FW_THREAD == FW_THREAD_STL

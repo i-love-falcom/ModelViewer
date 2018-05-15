@@ -5,10 +5,27 @@
 #ifndef FW_FILE_H_
 #define FW_FILE_H_
 
+#define FW_FILE_UNKNOWN       (0)
+#define FW_FILE_LIBC          (1)
+#define FW_FILE_WIN32         (2)
+
+#if FW_BUILD_CONFIG_FORCE_USE_LIBC_FILE
+#define FW_FILE             FW_FILE_LIBC
+#elif defined(FW_PLATFORM_WIN32)
+#define FW_FILE             FW_FILE_WIN32
+#else
+#define FW_FILE             FW_FILE_LIBC
+#endif
+
+
 #include "file/fw_file_types.h"
 
 
 BEGIN_NAMESPACE_FW
+
+class FwFile;
+class FwFileHolder;
+
 
 /**
  * @brief ファイルを開く
@@ -17,7 +34,7 @@ BEGIN_NAMESPACE_FW
  * @param[in]      options      FileOptionsを論理和したもの
  * @param[in, out] fp           ファイルディスクリプタ
  */
-FW_DLL_FUNC sint32_t FwFileOpen(const str_t name, const sint32_t options, FwFile & fp);
+FW_DLL_FUNC sint32_t FwFileOpen(const str_t name, const uint32_t options, FwFile & fp);
 
 /**
  * @brief ファイルを閉じる
@@ -52,11 +69,17 @@ FW_DLL_FUNC sint32_t FwFileWrite(FwFile & fp, const void * src, const uint64_t t
 
 /**
  * @brief ファイルのサイズを取得する
- * @param[in]  relativePath 相対パス
- * @param[in]  fileName     ファイル名
- * @param[out] length       byte単位の長さ
+ * @param[in]  name     ファイル名
+ * @param[out] length   byte単位の長さ
  */
-FW_DLL_FUNC sint32_t FwFileGetLength(const str_t name, uint64_t * length);
+FW_DLL_FUNC sint32_t FwFileGetLengthByName(const str_t name, uint64_t * length);
+
+/**
+ * @brief ファイルのサイズを取得する
+ * @param[in]  fp       ファイルディスクリプタ
+ * @param[out] length   byte単位の長さ
+ */
+FW_DLL_FUNC sint32_t FwFileGetLength(FwFile & fp, uint64_t * length);
 
 /**
  * @brief ファイルが存在するか調べる
@@ -81,10 +104,63 @@ FW_DLL_FUNC sint32_t FwFileFlushBuffer(FwFile & fp);
 
 
 /**
- * @brief 標準入出力デバイスハンドルを取得
+ * @class FwFile
+ * @brief ファイルディスクリプタ
  */
-FW_DLL_FUNC FwFile FwFileGetStdFileHandle(const FwStdDeviceHandle handle);
+class FwFile {
+public:
+#if FW_FILE == FW_FILE_WIN32
+    HANDLE      nativeHandle;
+#elif FW_FILE == FW_FILE_LIBC
+    FILE *      nativeHandle;
+#endif
+    sint32_t    options;
 
+   /**
+    * @brief 標準入力デバイスを取得
+    */
+    static FW_INLINE FwFile StdInputDevice() {
+        FwFile file;
+        file.options = kFileOptFlagNoClose;
+
+#if FW_FILE == FW_FILE_WIN32
+        file.nativeHandle = ::GetStdHandle(STD_INPUT_HANDLE);
+#elif FW_FILE == FW_FILE_LIBC
+        file.nativeHandle = stdin;
+#endif
+        return file;
+    }
+
+    /**
+     * @brief 標準出力デバイスを取得
+     */
+    static FW_INLINE FwFile StdOutputDevice() {
+        FwFile file;
+        file.options = kFileOptFlagNoClose;
+
+#if FW_FILE == FW_FILE_WIN32
+        file.nativeHandle = ::GetStdHandle(STD_OUTPUT_HANDLE);
+#elif FW_FILE == FW_FILE_LIBC
+        file.nativeHandle = stdout;
+#endif
+        return file;
+    }
+
+    /**
+     * @brief 標準エラーデバイスを取得
+     */
+    static FW_INLINE FwFile StdErrorDevice() {
+        FwFile file;
+        file.options = kFileOptFlagNoClose;
+
+#if FW_FILE == FW_FILE_WIN32
+        file.nativeHandle = ::GetStdHandle(STD_ERROR_HANDLE);
+#elif FW_FILE == FW_FILE_LIBC
+        file.nativeHandle = stderr;
+#endif
+        return file;
+    }
+};
 
 /**
  * @class FwFileHolder

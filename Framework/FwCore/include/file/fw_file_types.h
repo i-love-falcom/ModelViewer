@@ -82,43 +82,6 @@ enum FwFilePriority {
     kFilePriorityHighest        = (kFilePriorityMax - kFilePriorityMin) * 0 / 6 + kFilePriorityMin, ///< 最高の優先度
 };
 
-/**
- * @enum FwStdDeviceHandle
- */
-enum FwStdDeviceHandle {
-    kStdInputDeviceHandle,      ///< 標準入力ハンドル
-    kStdOutputDeviceHandle,     ///< 標準出力ハンドル
-    kStdErrorDeviceHandle,      ///< 標準エラーハンドル
-};
-
-
-/**
- * @struct FwFile
- * @brief ファイルディスクリプタ
- */
-struct FW_DLL FwFile {
-#if defined(FW_PLATFORM_WIN32)
-    HANDLE      nativeHandle;
-#else
-    FILE *      nativeHandle;
-#endif
-    sint32_t    options;
-
-
-//    const file_t & operator =(const file_t ref) {
-//        this->fileHandle = ref.fileHandle;
-//        this->options = ref.options;
-//
-//        return *this;
-//    }
-
-//    file_t()
-//    : fileHandle(nullptr)
-//    , options(0) {
-//    }
-};
-
-
 END_NAMESPACE_FW
 
 #endif  // FW_FILE_TYPES_H_
