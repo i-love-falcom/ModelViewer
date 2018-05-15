@@ -17,6 +17,9 @@
 #define FW_FILE             FW_FILE_LIBC
 #endif
 
+#if FW_FILE == FW_FILE_UNKNOWN
+#error unsupported platform
+#endif
 
 #include "file/fw_file_types.h"
 
