@@ -5,11 +5,16 @@
 #ifndef FW_ASSERT_H_
 #define FW_ASSERT_H_
 
-#if defined(FW_PLATFORM_WIN32)
-    #define abort_process()     {DebugBreak();}
-#else
-    #define abort_process()     {while(true) {}}
+#if !defined(FW_NDEBUG) || FW_BUILD_CONFIG_FORCE_ENABLE_ASSERT
+    #define FW_ENABLE_ASSERT        (1)
 #endif
+
+#if FW_ENABLE_ASSERT
+    #if defined(FW_PLATFORM_WIN32)
+        #define abort_process()     {DebugBreak();}
+    #else
+        #define abort_process()     {while(true) {}}
+    #endif
 
     
 FW_INLINE void fwassert(const bool expr, const char * msg, const char * file, int line) {
@@ -18,12 +23,10 @@ FW_INLINE void fwassert(const bool expr, const char * msg, const char * file, in
         return;
     }
     if (!expr) {
-        DebugLog::Error((str_t)(_T("Assertion failed: %s %d : %s\n")), file, line, msg);
+        NAMESPACE_FW DebugLog::Error((str_t)(_T("Assertion failed: %s %d : %s\n")), file, line, msg);
         abort_process();
     }
 }
-
-#if !defined(FW_NDEBUG) || FW_BUILD_CONFIG_FORCE_ENABLE_ASSERT
     #define FwAssertMessage(expr__, msg__)      fwassert((expr__), msg__, __FILE__, __LINE__)
     #define FwAssert(expr__)                    fwassert((expr__), # expr__, __FILE__, __LINE__)
 #else   // not FW_DEBUG

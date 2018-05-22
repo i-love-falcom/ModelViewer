@@ -32,10 +32,9 @@ class FwFileHolder;
 
 /**
  * @brief ファイルを開く
- * @param[in]      relativePath 相対パス
- * @param[in]      fileName     ファイル名
- * @param[in]      options      FileOptionsを論理和したもの
- * @param[in, out] fp           ファイルディスクリプタ
+ * @param[in]  name     ファイル名
+ * @param[in]  options  FileOptionsを論理和したもの
+ * @param[out] fp       ファイルディスクリプタ
  */
 FW_DLL_FUNC sint32_t FwFileOpen(const str_t name, const uint32_t options, FwFile & fp);
 
@@ -47,10 +46,9 @@ FW_DLL_FUNC sint32_t FwFileClose(FwFile & fp);
 
 /**
  * @brief ファイルを削除
- * @param[in] relativePath 相対パス
- * @param[in] fileName     ファイル名
+ * @param[in] name  ファイル名
  */
-FW_DLL_FUNC sint32_t FwFileDelete(const str_t fileName);
+FW_DLL_FUNC sint32_t FwFileDelete(const str_t name);
 
 /**
  * @brief ファイルを読み込む

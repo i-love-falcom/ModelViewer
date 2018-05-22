@@ -21,6 +21,7 @@
 #include <thread>
 #include <mutex>
 #include <condition_variable>
+#include <atomic>
 
 #include "core/fw_build_config.h"
 #include "core/fw_define.h"

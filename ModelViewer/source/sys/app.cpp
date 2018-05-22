@@ -34,7 +34,7 @@ public:
         ::OutputDebugString(log);
 #else
         uint64_t writeSize = tstring::Length(log) * sizeof(char_t);
-        FileWrite(GetStdFileHandle(kStdOutputDeviceHandle), log, writeSize, nullptr);
+        FwFileWrite(FwFile::StdOutputDevice(), log, writeSize, nullptr);
 #endif
         return 0;
     }

@@ -19,12 +19,12 @@ class FwFileStream;
  * @struct FwFileManagerDesc
  */
 struct FwFileManagerDesc {
-    FwThreadAffinity    threadAffinity;
-    FwThreadPriority    threadPriority;
+    FwThreadAffinity    _threadAffinity;
+    FwThreadPriority    _threadPriority;
 
     FW_INLINE void Init() {
-        threadAffinity = DefaultFwThreadAffinity;
-        threadPriority = FwThreadPriority::kTheadPriorityNormal;
+        _threadAffinity = DefaultFwThreadAffinity;
+        _threadPriority = FwThreadPriority::kTheadPriorityNormal;
     }
 };
 
@@ -117,9 +117,8 @@ protected:
 };
 
 /**
- * @brief FileSystemを生成
- * @param[in]   desc      詳細
- * @param[in]   allocator 内部使用するアロケータを指定。nullptrならDefaultAllocatorを使用
+ * @brief FwFileManagerを生成
+ * @param[in] desc 詳細
  */
 FW_DLL_FUNC FwFileManager * CreateFileManager(FwFileManagerDesc * desc);
 

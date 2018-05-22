@@ -33,6 +33,12 @@
     <Filter Include="source files\file">
       <UniqueIdentifier>{21936a83-9cd6-4d96-9496-9fd51a5c2f6d}</UniqueIdentifier>
     </Filter>
+    <Filter Include="header files\resource">
+      <UniqueIdentifier>{821fcac5-ee1e-42e6-b0c1-6caab974179c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="source files\resource">
+      <UniqueIdentifier>{cae8b6e8-b8b2-4ec9-9d0a-6c02e3c4bd13}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\core\fw_define.h">
@@ -107,6 +113,15 @@
     <ClInclude Include="include\fw_core.h">
       <Filter>header files</Filter>
     </ClInclude>
+    <ClInclude Include="include\resource\fw_resource.h">
+      <Filter>header files\resource</Filter>
+    </ClInclude>
+    <ClInclude Include="include\resource\fw_resource_types.h">
+      <Filter>header files\resource</Filter>
+    </ClInclude>
+    <ClInclude Include="include\resource\fw_resource_manager.h">
+      <Filter>header files\resource</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="source\debug\fw_debug_log.cpp">
@@ -132,6 +147,12 @@
     </ClCompile>
     <ClCompile Include="source\fw_core.cpp">
       <Filter>source files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\resource\fw_resource.cpp">
+      <Filter>source files\resource</Filter>
+    </ClCompile>
+    <ClCompile Include="source\resource\fw_resource_manager.cpp">
+      <Filter>source files\resource</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

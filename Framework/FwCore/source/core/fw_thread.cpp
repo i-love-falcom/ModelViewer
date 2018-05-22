@@ -6,7 +6,6 @@
 #include "core/fw_thread.h"
 
 BEGIN_NAMESPACE_FW
-BEGIN_NAMESPACE_NONAME
 /**
  * @class ThreadInfo
  */
@@ -47,6 +46,7 @@ public:
     }
 };
 
+BEGIN_NAMESPACE_NONAME
 static void SetThreadName(FwThread * thread) {
 #if defined(FW_PLATFORM_WIN32)
     const uint32_t MS_VC_EXCEPTION = 0x406d1388;

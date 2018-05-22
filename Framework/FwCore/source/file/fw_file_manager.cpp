@@ -18,30 +18,30 @@ BEGIN_NAMESPACE_NONAME
  * @struct FwFileIONotification
  */
 struct FwFileIONotification {
-    std::mutex                  mtx;
-    std::condition_variable     cv;
-    bool                        ready;
+    std::mutex                  _mutexFileIO;
+    std::condition_variable     _condFileIO;
+    bool                        _ready;
 
     void Reset() {
-        ready = false;
+        _ready = false;
     }
 
     void Notify() {
         {
-            std::lock_guard<std::mutex> lock(mtx);
-            ready = true;
+            std::lock_guard<std::mutex> lock(_mutexFileIO);
+            _ready = true;
         }
-        cv.notify_all();
+        _condFileIO.notify_all();
     }
 
     void Wait() {
-        std::unique_lock<std::mutex> lock(mtx);
-        cv.wait(lock, [this]() { return ready; });
+        std::unique_lock<std::mutex> lock(_mutexFileIO);
+        _condFileIO.wait(lock, [this]() { return _ready; });
     }
 
     bool WaitFor(const uint32_t milliseconds) {
-        std::unique_lock<std::mutex> lock(mtx);
-        return cv.wait_for(lock, std::chrono::milliseconds(milliseconds), [this]() { return ready; });
+        std::unique_lock<std::mutex> lock(_mutexFileIO);
+        return _condFileIO.wait_for(lock, std::chrono::milliseconds(milliseconds), [this]() { return _ready; });
     }
 };
 
@@ -56,14 +56,14 @@ struct FwFileIOCommand {
         kFlagNotification   = BIT32(3),
     };
 
-    FwFile      fp;
-    sint32_t    flags;
-    uint32_t    priority;
-    FwSeekOrigin  seekOrigin;
-    sint64_t    seekOffset;
+    FwFile          _fp;
+    sint32_t        _flags;
+    uint32_t        _priority;
+    FwSeekOrigin    _seekOrigin;
+    sint64_t        _seekOffset;
 
-    void *      rwBuffer;
-    uint64_t    rwSize;
+    void *      _rwBuffer;
+    uint64_t    _rwSize;
 
     FwFileIONotification * notification;
 };
@@ -73,8 +73,8 @@ struct FwFileIOCommand {
  * @struct FwFileIOSharedBuffer
  */
 struct FwFileIOSharedBuffer {
-    deque<FwFileIOCommand>  commandQueue;
-    std::mutex              commandQueueMutex;
+    deque<FwFileIOCommand>  _commandQueue;
+    std::mutex              _commandQueueMutex;
 };
 
 /**
@@ -82,7 +82,7 @@ struct FwFileIOSharedBuffer {
  */
 class FwFileIOThread : public FwThread {
 public:
-    FwFileIOSharedBuffer *  sharedBuffer;
+    FwFileIOSharedBuffer *  _sharedBuffer;
 
 
     virtual sint32_t ThreadFunc(void * userArgs) FW_OVERRIDE {
@@ -92,11 +92,11 @@ public:
             
             // キューからコマンドを取得
             bool foundNewCommand = false;
-            if (!sharedBuffer->commandQueue.empty()) {
-                std::lock_guard<std::mutex> lock(sharedBuffer->commandQueueMutex);
-                if (!sharedBuffer->commandQueue.empty()) {
-                    cmd = sharedBuffer->commandQueue.front();
-                    sharedBuffer->commandQueue.pop_front();
+            if (!_sharedBuffer->_commandQueue.empty()) {
+                std::lock_guard<std::mutex> lock(_sharedBuffer->_commandQueueMutex);
+                if (!_sharedBuffer->_commandQueue.empty()) {
+                    cmd = _sharedBuffer->_commandQueue.front();
+                    _sharedBuffer->_commandQueue.pop_front();
                     foundNewCommand = true;
                 }
             }
@@ -105,22 +105,22 @@ public:
             }
 
             // 読み込み／書き込み位置を移動
-            if ((cmd.flags & FwFileIOCommand::kFlagFileSeek) != 0) {
-                sint32_t result = FwFileSeek(cmd.fp, cmd.seekOffset, cmd.seekOrigin);
+            if ((cmd._flags & FwFileIOCommand::kFlagFileSeek) != 0) {
+                sint32_t result = FwFileSeek(cmd._fp, cmd._seekOffset, cmd._seekOrigin);
                 FwAssert(result != FW_OK);
             }
 
             // ファイルアクセス
-            if ((cmd.flags & FwFileIOCommand::kFlagFileRead) != 0) {
-                sint32_t result = FwFileRead(cmd.fp, cmd.rwBuffer, cmd.rwSize, nullptr);
+            if ((cmd._flags & FwFileIOCommand::kFlagFileRead) != 0) {
+                sint32_t result = FwFileRead(cmd._fp, cmd._rwBuffer, cmd._rwSize, nullptr);
                 FwAssert(result == FW_OK);
-            } else if ((cmd.flags & FwFileIOCommand::kFlagFileWrite) != 0) {
-                sint32_t result = FwFileWrite(cmd.fp, cmd.rwBuffer, cmd.rwSize, nullptr);
+            } else if ((cmd._flags & FwFileIOCommand::kFlagFileWrite) != 0) {
+                sint32_t result = FwFileWrite(cmd._fp, cmd._rwBuffer, cmd._rwSize, nullptr);
                 FwAssert(result == FW_OK);
             }
 
             // 終了通知
-            if ((cmd.flags & FwFileIOCommand::kFlagNotification) != 0) {
+            if ((cmd._flags & FwFileIOCommand::kFlagNotification) != 0) {
                 cmd.notification->Notify();
             }
         }
@@ -182,16 +182,16 @@ public:
         }
 
         FwFileIOCommand & cmd = localBuffer.append();
-        cmd.fp              = fileHandle;
-        cmd.flags           = FwFileIOCommand::kFlagFileRead;
-        cmd.priority        = priority;
-        cmd.seekOrigin      = seekOrigin;
-        cmd.seekOffset      = seekOffset;
-        cmd.rwBuffer        = dst;
-        cmd.rwSize          = readSize;
+        cmd._fp              = fileHandle;
+        cmd._flags           = FwFileIOCommand::kFlagFileRead;
+        cmd._priority        = priority;
+        cmd._seekOrigin      = seekOrigin;
+        cmd._seekOffset      = seekOffset;
+        cmd._rwBuffer        = dst;
+        cmd._rwSize          = readSize;
 
         if (updateFileSeek) {
-            cmd.flags |= FwFileIOCommand::kFlagFileSeek;
+            cmd._flags |= FwFileIOCommand::kFlagFileSeek;
             updateFileSeek = false;
         }
 
@@ -205,15 +205,15 @@ public:
         }
 
         FwFileIOCommand & cmd = localBuffer.append();
-        cmd.fp              = fileHandle;
-        cmd.flags           = FwFileIOCommand::kFlagFileWrite;
-        cmd.seekOrigin      = seekOrigin;
-        cmd.seekOffset      = seekOffset;
-        cmd.rwBuffer        = const_cast<void *>(src);
-        cmd.rwSize          = writeSize;
+        cmd._fp              = fileHandle;
+        cmd._flags           = FwFileIOCommand::kFlagFileWrite;
+        cmd._seekOrigin      = seekOrigin;
+        cmd._seekOffset      = seekOffset;
+        cmd._rwBuffer        = const_cast<void *>(src);
+        cmd._rwSize          = writeSize;
 
         if (updateFileSeek) {
-            cmd.flags |= FwFileIOCommand::kFlagFileSeek;
+            cmd._flags |= FwFileIOCommand::kFlagFileSeek;
             updateFileSeek = false;
         }
 
@@ -223,22 +223,22 @@ public:
     // 処理を送出する
     virtual void DoSubmit() FW_OVERRIDE {
         auto & cmd = localBuffer.back();
-        cmd.flags |= FwFileIOCommand::kFlagNotification;
+        cmd._flags |= FwFileIOCommand::kFlagNotification;
         cmd.notification = &finishNotification;
 
         finishNotification.Reset();
 
-        FwFileIOSharedBuffer * sharedBuffer = fileIOThread->sharedBuffer;
+        FwFileIOSharedBuffer * sharedBuffer = fileIOThread->_sharedBuffer;
         {
             // 共有バッファのキューにコマンドを積む
-            std::lock_guard<std::mutex> lock(sharedBuffer->commandQueueMutex);
+            std::lock_guard<std::mutex> lock(sharedBuffer->_commandQueueMutex);
 
             // 優先度でソート
-            auto itr = std::lower_bound(sharedBuffer->commandQueue.begin(), sharedBuffer->commandQueue.end(),
-                localBuffer.front(), [](const FwFileIOCommand & a, const FwFileIOCommand & b) { return a.priority - b.priority; });
+            auto itr = std::lower_bound(sharedBuffer->_commandQueue.begin(), sharedBuffer->_commandQueue.end(),
+                localBuffer.front(), [](const FwFileIOCommand & a, const FwFileIOCommand & b) { return a._priority - b._priority; });
 
             // 見つかった位置に全て挿入
-            sharedBuffer->commandQueue.insert(itr, localBuffer.begin(), localBuffer.end());
+            sharedBuffer->_commandQueue.insert(itr, localBuffer.begin(), localBuffer.end());
         }
 
         // スレッドを起こす
@@ -280,11 +280,11 @@ public:
 
         FwThreadDesc threadDesc;
         threadDesc.Init();
-        threadDesc.affinity = desc->threadAffinity;
-        threadDesc.priority = desc->threadPriority;
+        threadDesc.affinity = desc->_threadAffinity;
+        threadDesc.priority = desc->_threadPriority;
         string::Copy(threadDesc.name, ARRAY_SIZEOF(threadDesc.name), _T("FileIO Thread"));
 
-        fileIOThread.sharedBuffer = &this->sharedBuffer;
+        fileIOThread._sharedBuffer = &this->sharedBuffer;
         fileIOThread.StartWorker(&threadDesc);
     }
 

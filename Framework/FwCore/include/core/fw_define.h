@@ -167,7 +167,7 @@
 //---------------------------------------------
 // namespace
 //---------------------------------------------
-#ifndef FW_UNUSE_NAMESPACE
+#ifdef FW_UNUSE_NAMESPACE
     #define BEGIN_NAMESPACE_FW
     #define END_NAMESPACE_FW
     #define NAMESPACE_FW
@@ -181,8 +181,8 @@
     #define NAMESPACE_FW                fw::
     #define USING_NAMESPACE_FW          using namespace fw;
 
-#define BEGIN_NAMESPACE_NONAME          namespace {
-#define END_NAMESPACE_NONAME            }   // namespace ""
+    #define BEGIN_NAMESPACE_NONAME      namespace {
+    #define END_NAMESPACE_NONAME        }   // namespace ""
 #endif
 
 //---------------------------------------------

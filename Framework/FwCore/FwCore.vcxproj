@@ -42,6 +42,9 @@
     <ClInclude Include="include\fw_core.h" />
     <ClInclude Include="include\misc\fw_fsm.h" />
     <ClInclude Include="include\misc\fw_noncopyable.h" />
+    <ClInclude Include="include\resource\fw_resource.h" />
+    <ClInclude Include="include\resource\fw_resource_manager.h" />
+    <ClInclude Include="include\resource\fw_resource_types.h" />
     <ClInclude Include="source\precompiled.h" />
   </ItemGroup>
   <ItemGroup>
@@ -58,6 +61,8 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="source\resource\fw_resource.cpp" />
+    <ClCompile Include="source\resource\fw_resource_manager.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>
