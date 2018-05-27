@@ -1,21 +1,33 @@
 ﻿/**
  * @file fw_res_manager.h
  */
+#include "core/fw_thread.h"
 #include "misc/fw_noncopyable.h"
 #include "resource/fw_res_package.h"
 
 BEGIN_NAMESPACE_FW
 
 class FwFileManager;
+class FwResPackage;
+
+using FwResPackageOnComplete    = std::function<void(const str_t, const str_t, FwResPackage *)>;
+using FwResPackageOnError       = std::function<void(const str_t, const str_t, sint32_t)>;
 
 
 /**
  * @struct FwResManagerDesc
  */
 struct FwResManagerDesc {
-    FwFileManager*  _fileManager;   ///< ファイルマネージャ
+    FwThreadAffinity    _threadAffinity;    ///< スレッドアフィニティ
+    FwThreadPriority    _threadPriority;    ///< スレッド優先度
+    FwFileManager*      _fileManager;       ///< ファイルマネージャ
+
+    //! @todo Webから取得できるように
+
 
     FW_INLINE void Init() {
+        _threadAffinity = DefaultFwThreadAffinity;
+        _threadPriority = FwThreadPriority::kTheadPriorityNormal;
         _fileManager = nullptr;
     }
 };
@@ -36,11 +48,12 @@ public:
      * @brief パッケージをロードする
      * @param[in] relativePath  相対パス
      * @param[in] name          パッケージ名
-     * @param[out] handle       パッケージハンドル
+     * @param[in] onComplate    ロード完了時に呼び出されるコールバック
+     * @param[in] onError       エラー発生時に呼び出されるコールバック
      * @return エラーコード
      */
-    FW_INLINE sint32_t LoadPackage(const str_t relativePath, const str_t name, FwResPackageHandle * handle) {
-        return DoLoadPackage(relativePath, name, handle);
+    FW_INLINE sint32_t LoadPackage(const str_t relativePath, const str_t name, FwResPackageOnComplete onComplete, FwResPackageOnError onError) {
+        return DoLoadPackage(relativePath, name, onComplete, onError);
     }
     
     /**
@@ -48,8 +61,8 @@ public:
      * @param[in] handle    パッケージハンドル
      * @return エラーコード
      */
-    FW_INLINE sint32_t UnloadPackage(FwResPackageHandle & handle) {
-        return DoUnloadPackage(handle);
+    FW_INLINE sint32_t UnloadPackage(FwResPackage * package) {
+        return DoUnloadPackage(package);
     }
 
     
@@ -65,17 +78,18 @@ protected:
      * @brief パッケージをロードする
      * @param[in] relativePath  相対パス
      * @param[in] name          パッケージ名
-     * @param[out] handle       パッケージハンドル
+     * @param[in] onComplate    ロード完了時に呼び出されるコールバック
+     * @param[in] onError       エラー発生時に呼び出されるコールバック
      * @return エラーコード
      */
-    virtual sint32_t DoLoadPackage(const str_t relativePath, const str_t name, FwResPackageHandle * handle) = 0;
+    virtual sint32_t DoLoadPackage(const str_t relativePath, const str_t name, FwResPackageOnComplete onComplete, FwResPackageOnError onError) = 0;
 
     /**
      * @brief パッケージをアンロードする
      * @param[in] handle    パッケージハンドル
      * @return エラーコード
      */
-    virtual sint32_t DoUnloadPackage(FwResPackageHandle & handle) = 0;
+    virtual sint32_t DoUnloadPackage(FwResPackage * package) = 0;
 };
 
 /**

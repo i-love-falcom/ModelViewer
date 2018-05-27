@@ -2,12 +2,11 @@
  * @file fw_res_manager_impl.h
  */
 #include "resource/fw_res_manager.h"
-#include "resource/fw_res_package.h"
-#include "resource/fw_res.h"
 
 BEGIN_NAMESPACE_FW
 
 class FwFileManager;
+class FwResPackage;
 
 /**
  * @class FwResManagerImpl
@@ -34,7 +33,7 @@ public:
      * @param[out] handle       パッケージハンドル
      * @return エラーコード
      */
-    virtual sint32_t DoLoadPackage(const str_t relativePath, const str_t name, FwResPackageHandle * handle) FW_OVERRIDE;
+    virtual sint32_t DoLoadPackage(const str_t relativePath, const str_t name, FwResPackageOnComplete onComplete, FwResPackageOnError onError) FW_OVERRIDE;
 
     /**
      * @internal
@@ -42,7 +41,7 @@ public:
      * @param[in] handle    パッケージハンドル
      * @return エラーコード
      */
-    virtual sint32_t DoUnloadPackage(FwResPackageHandle & handle) FW_OVERRIDE;
+    virtual sint32_t DoUnloadPackage(FwResPackage * package) FW_OVERRIDE;
 
     /**
      * @brief
@@ -58,7 +57,17 @@ public:
     //! @todo リソースデータベース作成
 
 private:
+    /**
+     * @brief ローカルファイルからパッケージをロードする
+     */
+    sint32_t LoadPackageFromFile(const str_t relativePath, const str_t name, FwResPackageHandle * handle);
+
+
+
+
+
     FwFileManager * _fileManager;
+    //! @todo Webから取得できるように
 };
 
 
