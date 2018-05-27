@@ -1,26 +1,20 @@
 ﻿/**
  * @file fw_resource.h
  */
-#ifndef FW_RESOURCE_H_
-#define FW_RESOURCE_H_
+#ifndef FW_RES_H_
+#define FW_RES_H_
 
-#include "resource/fw_resource_types.h"
+#include "resource/fw_res_types.h"
 
 BEGIN_NAMESPACE_FW
 
-//! @todo 後でちゃんと定義する
-using FwResId = uint64_t;
-using FwResType = uint32_t;
+class FwResManager;
 
 /**
  * @class FwRes
  */
 class FwRes {
 public:
-    enum {
-        kMaxNameLen = 31,
-    };
-
     /**
      * @brief 破棄
      */
@@ -59,15 +53,23 @@ public:
             Destroy();
         }
     }
+
+    /**
+     * @brief 参照カウントを取得
+     */
+    FW_INLINE uint32_t GetRef(std::memory_order order = std::memory_order_seq_cst) {
+        return _referenceCount.load(order);
+    }
     
 protected:
-    uint32_t                _delayReleaseCount; //! 遅延解放カウント
-    std::atomic_uint32_t    _referenceCount;    //! 参照カウント
+    char_t          _name[MAX_RES_NAME_LEN + 1];
+    FwResId         _id;
+    FwResType       _type;
 
-    char_t      _name[kMaxNameLen];
-    FwResId     _id;
-    FwResType   _type;
-
+private:
+    uint32_t                _delayReleaseCount; ///< 遅延解放カウント
+    std::atomic_uint32_t    _referenceCount;    ///< 参照カウント
+    FwResManager *          _manager;
 };
 
 /**
@@ -203,4 +205,4 @@ static FW_INLINE bool operator !=(T* a, const FwResPtr<T>& b) {
 
 END_NAMESPACE_FW
 
-#endif	// FW_RESOURCE_H_
+#endif	// FW_RES_H_

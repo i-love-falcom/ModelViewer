@@ -17,8 +17,11 @@ protected:
     ~NonCopyable() {}
     
 private:
+    NonCopyable(NonCopyable &&) = delete;
     NonCopyable(const NonCopyable &) = delete;
-    T & operator =(const T &) = delete;
+
+    const T & operator =(T &&) = delete;
+    const T & operator =(const T &) = delete;
 };
 
 END_NAMESPACE_FW

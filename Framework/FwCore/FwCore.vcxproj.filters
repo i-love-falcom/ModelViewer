@@ -39,6 +39,9 @@
     <Filter Include="source files\resource">
       <UniqueIdentifier>{cae8b6e8-b8b2-4ec9-9d0a-6c02e3c4bd13}</UniqueIdentifier>
     </Filter>
+    <Filter Include="header files\resource\detail">
+      <UniqueIdentifier>{a76f8e0b-af6a-4414-9dac-e2b73d643dba}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\core\fw_define.h">
@@ -113,14 +116,20 @@
     <ClInclude Include="include\fw_core.h">
       <Filter>header files</Filter>
     </ClInclude>
-    <ClInclude Include="include\resource\fw_resource.h">
+    <ClInclude Include="include\resource\fw_res.h">
       <Filter>header files\resource</Filter>
     </ClInclude>
-    <ClInclude Include="include\resource\fw_resource_types.h">
+    <ClInclude Include="include\resource\fw_res_manager.h">
       <Filter>header files\resource</Filter>
     </ClInclude>
-    <ClInclude Include="include\resource\fw_resource_manager.h">
+    <ClInclude Include="include\resource\fw_res_types.h">
       <Filter>header files\resource</Filter>
+    </ClInclude>
+    <ClInclude Include="include\resource\fw_res_package.h">
+      <Filter>header files\resource</Filter>
+    </ClInclude>
+    <ClInclude Include="include\resource\detail\fw_res_manager_impl.h">
+      <Filter>header files\resource\detail</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -148,10 +157,10 @@
     <ClCompile Include="source\fw_core.cpp">
       <Filter>source files</Filter>
     </ClCompile>
-    <ClCompile Include="source\resource\fw_resource.cpp">
+    <ClCompile Include="source\resource\fw_res_manager.cpp">
       <Filter>source files\resource</Filter>
     </ClCompile>
-    <ClCompile Include="source\resource\fw_resource_manager.cpp">
+    <ClCompile Include="source\resource\fw_res_package.cpp">
       <Filter>source files\resource</Filter>
     </ClCompile>
   </ItemGroup>
