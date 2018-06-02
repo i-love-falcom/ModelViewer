@@ -45,6 +45,17 @@ public:
     }
 
     /**
+     * @brief パッケージを生成
+     * @param[in] desc      パッケージの記述
+     * @param[in] name      パッケージ名
+     * @param[out] package  生成したパッケージ
+     * @return エラーコード
+     */
+    FW_INLINE sint32_t CreatePackage(const FwResPackageDesc & desc, const str_t name, const FwResPackage ** package) {
+        return DoCreatePackage(desc, name, package);
+    }
+
+    /**
      * @brief パッケージをロードする
      * @param[in] relativePath  相対パス
      * @param[in] name          パッケージ名
@@ -68,11 +79,29 @@ public:
     
     //! @todo リソース登録、解除作成
 
+    /**
+     * @brief 論理パスを物理パスへ変換する
+     * @param[out] physicalPath  物理パス格納先バッファ
+     * @param[in]  numOfElements 物理パス格納先バッファのエレメント数
+     * @param[in] logicalPath    論理パス
+     */
+    sint32_t ConvertLogicalToPhysical(str_t physicalPath, const size_t numOfElements, const str_t logicalPath) {
+        return DoConvertLogicalToPhysical(physicalPath, numOfElements, logicalPath);
+    }
+
 protected:
     /**
      * @brief 終了処理
      */
     virtual void DoShutdown() = 0;
+
+    /**
+     * @brief パッケージを生成
+     * @param[in] desc      パッケージの記述
+     * @param[in] name      パッケージ名
+     * @param[out] package  生成したパッケージ
+     */
+    virtual sint32_t DoCreatePackage(const FwResPackageDesc & desc, const str_t name, const FwResPackage ** package) = 0;
 
     /**
      * @brief パッケージをロードする
@@ -90,6 +119,14 @@ protected:
      * @return エラーコード
      */
     virtual sint32_t DoUnloadPackage(FwResPackage * package) = 0;
+
+    /**
+     * @brief 論理パスを物理パスへ変換する
+     * @param[out] physicalPath  物理パス格納先バッファ
+     * @param[in]  numOfElements 物理パス格納先バッファのエレメント数
+     * @param[in] logicalPath    論理パス
+     */
+    virtual sint32_t DoConvertLogicalToPhysical(str_t physicalPath, const size_t numOfElements, const str_t logicalPath) = 0;
 };
 
 /**

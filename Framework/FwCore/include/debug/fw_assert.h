@@ -7,6 +7,8 @@
 
 #if !defined(FW_NDEBUG) || FW_BUILD_CONFIG_FORCE_ENABLE_ASSERT
     #define FW_ENABLE_ASSERT        (1)
+#else
+    #define FW_ENABLE_ASSERT        (0)
 #endif
 
 #if FW_ENABLE_ASSERT

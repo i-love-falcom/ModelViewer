@@ -22,6 +22,12 @@ enum class FwResType : uint32_t {
     
 };
 
+/**
+ * @struct FwResDesc
+ */
+struct FwResDesc {
+    //! 登録の為の情報
+};
 
 //----------------------------------------------------
 // FwResPackage
@@ -36,6 +42,13 @@ using FwResPackageId = uint64_t; ///< パッケージID
  */
 enum class FwResPackageType : uint32_t {
     kRawData,   ///< Raw data
+};
+
+/**
+ * @struct FwResPackageDesc
+ */
+struct FwResPackageDesc {
+    //! 生成の為の情報
 };
 
 END_NAMESPACE_FW

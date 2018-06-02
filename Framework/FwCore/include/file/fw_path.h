@@ -7,15 +7,30 @@
 
 BEGIN_NAMESPACE_FW
 
+//! @todo 必要のないものを整理
+
 /**
  * @class FwPath
  */
 class FW_DLL FwPath {
 public:
-    enum {
-        kMaxFNameLen    = 255,
-        kMaxExtLen      = 255,
-        kMaxPathLen     = 1023,
+    /**
+     * @enum FwConstants
+     */
+    enum FwConstants : size_t {
+        kMaxFileNameLen     = 255,
+        kMaxExtLen          = 255,
+        kMaxPathLen         = 2047,
+    };
+
+    /**
+     * @enum FwFilePath
+     */
+    enum FwFilePath : sint32_t {
+        kFilePathRes,       ///< リソース格納パス
+        kFilePathTemp,      ///< 一時利用ファイル格納パス
+        kFilePathUser,      ///< ユーザデータ格納パス
+        kFilePathCount
     };
 
     /**

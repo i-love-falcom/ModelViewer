@@ -24,6 +24,11 @@ public:
     };
 
     /**
+     * @brief リソースを登録
+     */
+    sint32_t RegisterResource(const FwResDesc & desc, const str_t path);
+
+    /**
      * @brief 名前を取得
      */
     FW_INLINE const str_t GetName() const { return const_cast<const str_t>(_name); }

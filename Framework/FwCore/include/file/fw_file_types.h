@@ -60,7 +60,7 @@ enum FwFileOptions : uint32_t {
 /**
  * @enum FwSeekOrigin
  */
-enum FwSeekOrigin {
+enum FwSeekOrigin : sint32_t {
     kSeekOriginBegin = 0,  ///< 先頭
     kSeekOriginCurrent,    ///< 現在位置
     kSeekOriginEnd         ///< 末尾
@@ -69,7 +69,7 @@ enum FwSeekOrigin {
 /**
  * @enum FwFilePriority
  */
-enum FwFilePriority {
+enum FwFilePriority : sint32_t {
     kFilePriorityMin            = 256,
     kFilePriorityMax            = 1024,
     

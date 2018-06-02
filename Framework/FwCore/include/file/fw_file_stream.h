@@ -125,7 +125,7 @@ protected:
     }
 
 
-    char_t  fileName[FwPath::kMaxFNameLen];
+    char_t  fileName[FwPath::kMaxFileNameLen];
 };
 
 END_NAMESPACE_FW

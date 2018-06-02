@@ -50,7 +50,7 @@ public:
      */
     FW_INLINE FwFileStream * FileStreamOpen(const str_t relativePath, const str_t fileName, const sint32_t options, const uint32_t priority = kFilePriorityNormal) {
         char_t tmpPath[FwPath::kMaxPathLen + 1];
-        return DoFileStreamOpen(FwPath::Combine(tmpPath, ARRAY_SIZEOF(tmpPath), GetBasePath(), relativePath, fileName), options, priority);
+        return DoFileStreamOpen(FwPath::Combine(tmpPath, ARRAY_SIZEOF(tmpPath), relativePath, fileName), options, priority);
     }
 
     /**
@@ -60,26 +60,28 @@ public:
      * @return ファイルストリームオブジェクト
      */
     FW_INLINE FwFileStream * FileStreamOpen(const str_t fileName, const sint32_t options) {
-        char_t tmpPath[FwPath::kMaxPathLen + 1];
-        return DoFileStreamOpen(FwPath::Combine(tmpPath, ARRAY_SIZEOF(tmpPath), GetBasePath(), fileName), options, kFilePriorityNormal);
+        return DoFileStreamOpen(fileName, options, kFilePriorityNormal);
     }
 
     /**
-     * @brief 基準となるパスをセット
-     * @param[in] path 基準パス位置
+     * @brief 特別なパスをセット
+     * @param[in] kind          パスの種類 
+     * @param[in] absolutePath  パス位置（絶対パス）
      */
-    FW_INLINE void SetBasePath(const str_t path) {
-        DoSetBasePath(path);
+    FW_INLINE void SetSpecialPath(const FwPath::FwFilePath kind, const str_t absolutePath) {
+        DoSetSpecialPath(kind, absolutePath);
     }
 
     /**
-     * @brief 基準となるパスを取得
-     * @return 基準パス位置
+     * @brief 特別なパスを取得
+     * @param[in] kind パスの種類 
+     * @return パス位置
      */
-    FW_INLINE const str_t GetBasePath() {
-        return DoGetBasePath();
+    FW_INLINE const str_t GetSpecialPath(const FwPath::FwFilePath kind) {
+        return DoGetSpecialPath(kind);
     }
 
+    
 
 protected:
     /**
@@ -95,13 +97,14 @@ protected:
     /**
      * @brief 基準となるパスをセット
      */
-    virtual void DoSetBasePath(const str_t path) = 0;
+    virtual void DoSetSpecialPath(const FwPath::FwFilePath kind, const str_t absolutePath) = 0;
 
     /**
      * @brief 基準となるパスを取得
      */
-    virtual const str_t DoGetBasePath() = 0;
+    virtual const str_t DoGetSpecialPath(const FwPath::FwFilePath kind) = 0;
 
+    
 
     /**
      * @brief コンストラクタ

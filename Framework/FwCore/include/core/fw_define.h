@@ -97,11 +97,35 @@
 //---------------------------------------------
 // defined internal character set
 //---------------------------------------------
+
+#define FW_TEXT_NARROW                  (0)
+#define FW_TEXT_WIDE                    (1)
+#define FW_TEXT_UTF8                    (2)
+#define FW_TEXT_UTF16                   (3)
+#define FW_TEXT_UTF32                   (4)
+
 #if defined(_UNICODE)
+    #define FW_TEXT_CODE                FW_TEXT_WIDE
     #define FW_UNICODE                  (1)
-#elif defined(_MBCS)
-    #define FW_MBCS                     (1)
+#else
+    #define FW_TEXT_CODE                FW_TEXT_NARROW
+    #define FW_UNICODE                  (0)
 #endif
+
+#if FW_TEXT_CODE == FW_TEXT_WIDE
+    #define FW_TEXT_DEFINED(x)          L ## x
+#elif FW_TEXT_CODE == FW_TEXT_UTF8
+    #define FW_TEXT_DEFINED(x)          u8 ## x
+#elif FW_TEXT_CODE == FW_TEXT_UTF16
+    #define FW_TEXT_DEFINED(x)          u ## x
+#elif FW_TEXT_CODE == FW_TEXT_UTF32
+    #define FW_TEXT_DEFINED(x)          U ## x
+#else
+    #define FW_TEXT_DEFINED(x)          x
+#endif
+
+#define FW_TEXT(x)                      FW_TEXT_DEFINED(x)
+
 
 //---------------------------------------------
 // defined compiler version

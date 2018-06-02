@@ -276,8 +276,7 @@ class FileManagerImpl : public FwFileManager {
 public:
     // 初期化
     void Init(FwFileManagerDesc * desc) {
-        FwPath::GetCurrentDir(basePath, ARRAY_SIZEOF(basePath));
-
+        
         FwThreadDesc threadDesc;
         threadDesc.Init();
         threadDesc.affinity = desc->_threadAffinity;
@@ -310,15 +309,17 @@ public:
         return stream;
     }
 
-    // 基準となるパスをセット
-    virtual void DoSetBasePath(const str_t path) FW_OVERRIDE {
-        string::Copy(basePath, ARRAY_SIZEOF(basePath), path);
+    // 特別なパスをセット
+    virtual void DoSetSpecialPath(const FwPath::FwFilePath kind, const str_t absolutePath) FW_OVERRIDE {
+        string::Copy(_specialPath[kind], ARRAY_SIZEOF(_specialPath[kind]), absolutePath);
     }
 
-    // 基準となるパスを取得
-    virtual const str_t DoGetBasePath() FW_OVERRIDE {
-        return basePath;
+    //  特別なパスを取得
+    virtual const str_t DoGetSpecialPath(const FwPath::FwFilePath kind) FW_OVERRIDE {
+        return _specialPath[kind];
     }
+
+    
 
     // コンストラクタ
     FileManagerImpl() {
@@ -332,7 +333,7 @@ public:
 
 
 private:
-    char_t  basePath[FwPath::kMaxPathLen + 1];
+    char_t  _specialPath[FwPath::kFilePathCount][FwPath::kMaxPathLen + 1];
 
     FwFileIOSharedBuffer  sharedBuffer;
     FwFileIOThread        fileIOThread;

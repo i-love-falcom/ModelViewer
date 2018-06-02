@@ -20,12 +20,18 @@
     typedef sint16_t                float16_t;  /**< 16bit浮動小数点 */
 
     // 文字列
-    #if FW_UNICODE
+    #if FW_TEXT_CODE == FW_TEXT_WIDE
         typedef wchar_t             char_t; /**< 文字型 */
         typedef wchar_t *           str_t;  /**< 文字列型 */
-    #elif FW_MBCS
-        typedef unsigned char       char_t; /**< 文字型 */
-        typedef unsigned char *     str_t;  /**< 文字列型 */
+    #elif FW_TEXT_CODE == FW_TEXT_UTF8
+        typedef char                char_t; /**< 文字型 */
+        typedef char *              str_t;  /**< 文字列型 */
+    #elif FW_TEXT_CODE == FW_TEXT_UTF16
+        typedef char16_t            char_t; /**< 文字型 */
+        typedef char16_t *          str_t;  /**< 文字列型 */
+    #elif FW_TEXT_CODE == FW_TEXT_UTF32
+        typedef char32_t            char_t; /**< 文字型 */
+        typedef char32_t *          str_t;  /**< 文字列型 */
     #else
         typedef char                char_t; /**< 文字型 */
         typedef char *              str_t;  /**< 文字列型 */

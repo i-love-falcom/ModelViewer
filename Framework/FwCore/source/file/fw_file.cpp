@@ -9,8 +9,8 @@
 
 BEGIN_NAMESPACE_FW
 
-sint32_t FwFileOpen(const str_t name, const uint32_t options, FwFile & fp) {
-    if (name == nullptr || (options & kFileOptAccessMask) == 0) {
+sint32_t FwFileOpen(const str_t physicalPath, const uint32_t options, FwFile & fp) {
+    if (physicalPath == nullptr || (options & kFileOptAccessMask) == 0) {
         return ERR_INVALID_PARMS;
     }
     
@@ -74,7 +74,7 @@ sint32_t FwFileOpen(const str_t name, const uint32_t options, FwFile & fp) {
     }
 
     auto nativeHandle = CreateFile(
-        name,
+        physicalPath,
         desiredAccess,
         sharedModel,
         NULL,   // security attributes
@@ -108,7 +108,7 @@ sint32_t FwFileOpen(const str_t name, const uint32_t options, FwFile & fp) {
     }
 
     FILE * nativeHandle = nullptr;
-    auto errorNo = _tfopen_s(&nativeHandle, name, opt.c_str());
+    auto errorNo = _tfopen_s(&nativeHandle, physicalPath, opt.c_str());
     if (errorNo != 0) {
         return ERR_INVALID;
     }
@@ -139,16 +139,16 @@ sint32_t FwFileClose(FwFile & fp) {
     return FW_OK;
 }
 
-sint32_t FwFileDelete(const str_t name) {
-    if (name == nullptr) {
+sint32_t FwFileDelete(const str_t physicalPath) {
+    if (physicalPath == nullptr) {
         return ERR_INVALID_PARMS;
     }
 #if FW_FILE == FW_FILE_WIN32
-    if (::DeleteFile(name) != 0) {
+    if (::DeleteFile(physicalPath) != 0) {
         return ERR_FAILED;
     }
 #else
-    if (_tremove(name) != 0) {
+    if (_tremove(physicalPath) != 0) {
         return ERR_FAILED;
     }
 #endif
@@ -234,13 +234,13 @@ sint32_t FwFileWrite(FwFile & fp, const void * src, const uint64_t toWriteSize, 
     return FW_OK;
 }
 
-sint32_t FwFileGetLengthByName(const str_t name, uint64_t * length) {
+sint32_t FwFileGetLengthByName(const str_t physicalPath, uint64_t * length) {
     if (length == nullptr) {
         return ERR_INVALID_PARMS;
     }
     
     FwFile fp;
-    auto result = FwFileOpen(name, kFileOptAccessRead | kFileOptSharedRead, fp);
+    auto result = FwFileOpen(physicalPath, kFileOptAccessRead | kFileOptSharedRead, fp);
     if (result != FW_OK) {
         return result;
     }
@@ -285,14 +285,14 @@ sint32_t FwFileGetLength(FwFile & fp, uint64_t * length) {
     return FW_OK;
 }
 
-bool FwFileIsExist(const str_t name) {
-    if (name == nullptr) {
+bool FwFileIsExist(const str_t physicalPath) {
+    if (physicalPath == nullptr) {
         return false;
     }
 
 #if FW_FILE == FW_FILE_WIN32
     HANDLE nativeHandle = CreateFile(
-        name,
+        physicalPath,
         0,
         FILE_SHARE_READ,
         nullptr,    // security attributes
@@ -306,7 +306,7 @@ bool FwFileIsExist(const str_t name) {
     CloseHandle(nativeHandle);
 #elif FW_FILE == FW_FILE_LIBC
     FILE * nativeHandle = nullptr;
-    auto errorNo = _tfopen_s(&nativeHandle, name, _T("rb"));
+    auto errorNo = _tfopen_s(&nativeHandle, physicalPath, _T("rb"));
     if (errorNo != 0) {
         return false;
     }

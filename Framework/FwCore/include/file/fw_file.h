@@ -32,11 +32,11 @@ class FwFileHolder;
 
 /**
  * @brief ファイルを開く
- * @param[in]  name     ファイル名
- * @param[in]  options  FileOptionsを論理和したもの
- * @param[out] fp       ファイルディスクリプタ
+ * @param[in]  physicalPath 物理ファイルパス
+ * @param[in]  options      FileOptionsを論理和したもの
+ * @param[out] fp           ファイルディスクリプタ
  */
-FW_DLL_FUNC sint32_t FwFileOpen(const str_t name, const uint32_t options, FwFile & fp);
+FW_DLL_FUNC sint32_t FwFileOpen(const str_t physicalPath, const uint32_t options, FwFile & fp);
 
 /**
  * @brief ファイルを閉じる
@@ -46,9 +46,9 @@ FW_DLL_FUNC sint32_t FwFileClose(FwFile & fp);
 
 /**
  * @brief ファイルを削除
- * @param[in] name  ファイル名
+ * @param[in] physicalPath 物理ファイルパス
  */
-FW_DLL_FUNC sint32_t FwFileDelete(const str_t name);
+FW_DLL_FUNC sint32_t FwFileDelete(const str_t physicalPath);
 
 /**
  * @brief ファイルを読み込む
@@ -70,10 +70,10 @@ FW_DLL_FUNC sint32_t FwFileWrite(FwFile & fp, const void * src, const uint64_t t
 
 /**
  * @brief ファイルのサイズを取得する
- * @param[in]  name     ファイル名
- * @param[out] length   byte単位の長さ
+ * @param[in]  physicalPath 物理ファイルパス
+ * @param[out] length       byte単位の長さ
  */
-FW_DLL_FUNC sint32_t FwFileGetLengthByName(const str_t name, uint64_t * length);
+FW_DLL_FUNC sint32_t FwFileGetLengthByName(const str_t physicalPath, uint64_t * length);
 
 /**
  * @brief ファイルのサイズを取得する
@@ -84,10 +84,9 @@ FW_DLL_FUNC sint32_t FwFileGetLength(FwFile & fp, uint64_t * length);
 
 /**
  * @brief ファイルが存在するか調べる
- * @param[in] relativePath 相対パス
- * @param[in] fileName     ファイル名
+ * @param[in] physicalPath 物理ファイルパス
  */
-FW_DLL_FUNC bool FwFileIsExist(const str_t name);
+FW_DLL_FUNC bool FwFileIsExist(const str_t physicalPath);
 
 /**
  * @brief ファイルポインタを移動する
@@ -116,6 +115,9 @@ public:
     FILE *      nativeHandle;
 #endif
     sint32_t    options;
+#if FW_DEBUG
+#endif
+
 
    /**
     * @brief 標準入力デバイスを取得
