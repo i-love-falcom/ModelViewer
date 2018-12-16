@@ -107,9 +107,6 @@
     <ClInclude Include="include\core\fw_thread.h">
       <Filter>header files\core</Filter>
     </ClInclude>
-    <ClInclude Include="include\core\fw_build_config.h">
-      <Filter>header files\core</Filter>
-    </ClInclude>
     <ClInclude Include="include\fw_core.h">
       <Filter>header files</Filter>
     </ClInclude>

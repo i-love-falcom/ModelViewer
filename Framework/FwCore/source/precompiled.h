@@ -23,30 +23,11 @@
 #include <condition_variable>
 #include <atomic>
 
-#include "core/fw_build_config.h"
-#include "core/fw_define.h"
+// ビルド設定
+#include "fw_build_config.h"
 
-// 静的ライブラリでなければエクスポート設定に置き換える
-#if !defined(STATIC_LIB)
-    #undef FW_DLL
-    #undef FW_DLL_FUNC
-    #define FW_DLL                      FW_EXPORT
-    #define FW_DLL_FUNC                 FW_EXPORT_FUNC
-#endif
-
-#include "core/fw_error.h"
-#include "core/fw_types.h"
-#include "core/fw_allocator.h"
-
-#include "debug/fw_debug_log.h"
-#include "debug/fw_assert.h"
-
-#include "misc/fw_noncopyable.h"
-
-#include "container/fw_container_allocator.h"
-#include "container/fw_array.h"
-#include "container/fw_deque.h"
-#include "container/fw_string.h"
-#include "container/fw_vector.h"
+// エクスポート設定
+#define EXPORT_DYNCMIC_LIB
+#include "fw_core.h"
 
 #endif  // PRECOMPILED_H_

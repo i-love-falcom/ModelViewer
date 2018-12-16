@@ -8,6 +8,6 @@
 #include "targetver.h"
 
 // CppUnitTest のヘッダー
-#include "CppUnitTest.h"
+//#include "CppUnitTest.h"
 
 // TODO: プログラムに必要な追加ヘッダーをここで参照してください

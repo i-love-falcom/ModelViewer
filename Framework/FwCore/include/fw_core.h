@@ -2,8 +2,8 @@
  * @file fw_core.h
  */
 #ifndef FW_CORE_H_
+#define FW_CORE_H_
 
-#include "core/fw_build_config.h"
 #include "core/fw_define.h"
 #include "core/fw_types.h"
 #include "core/fw_error.h"

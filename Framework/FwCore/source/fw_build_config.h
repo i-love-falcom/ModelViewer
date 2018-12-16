@@ -2,6 +2,7 @@
  * @file fw_build_config.h
  */
 #ifndef FW_BUILD_CONFIG_H_
+#define FW_BUILD_CONFIG_H_
 
 //! FwAssert ‚ğ‹­§“I‚É—LŒø‰»
 #define FW_BUILD_CONFIG_FORCE_ENABLE_ASSERT             (0)

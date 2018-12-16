@@ -89,10 +89,16 @@
     #define FW_NDEBUG                   (1)
 #endif
 
-#if defined(STATIC_LIB)
+#if defined(USE_STATIC_LIB)
     #define FW_STATIC_LIB               (1)
+#else
+    #define FW_DYNAMIC_LIB               (1)
+    #if defined(EXPORT_DYNCMIC_LIB)
+        #define FW_EXPORT_DYNAMIC_LIB   (1)
+    #else
+        #define FW_IMPORT_DYNAMIC_LIB   (1)
+    #endif
 #endif
-
 
 //---------------------------------------------
 // defined internal character set
@@ -158,6 +164,14 @@
 #if defined(FW_STATIC_LIB)
     #define FW_DLL
     #define FW_DLL_FUNC                 extern
+#elif defined(FW_DYNAMIC_LIB)
+    #if defined(FW_EXPORT_DYNAMIC_LIB)
+        #define FW_DLL                  FW_EXPORT
+        #define FW_DLL_FUNC             FW_EXPORT_FUNC
+    #else
+        #define FW_DLL                  FW_IMPORT
+        #define FW_DLL_FUNC             FW_IMPORT_FUNC
+    #endif
 #else
     #define FW_DLL                      FW_IMPORT
     #define FW_DLL_FUNC                 FW_IMPORT_FUNC
