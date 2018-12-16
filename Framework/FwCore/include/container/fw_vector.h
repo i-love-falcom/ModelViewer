@@ -36,8 +36,8 @@ public:
      * @return 末尾要素への参照
      */
     reference append() {
-        resize(size() + 1);
-        return back();
+        this->resize(this->size() + 1);
+        return this->back();
     }
 
     /**
@@ -45,8 +45,8 @@ public:
      * @return 末尾要素への参照
      */
     const_reference append() const {
-        resize(size() + 1);
-        return back();
+        this->resize(this->size() + 1);
+        return this->back();
     }
 
     /**
@@ -56,9 +56,9 @@ public:
      * @retval false    既に同じものが登録されていた
      */
     bool insert_unique(const _Ty & value) {
-        const_iterator itr = std::find(begin(), end(), value);
-        if (itr == end()) {
-            push_back(value);
+        const_iterator itr = std::find(this->begin(), this->end(), value);
+        if (itr == this->end()) {
+            this->push_back(value);
             return true;
         }
         return false;
@@ -69,8 +69,8 @@ public:
      * @param[in] value 登録する要素
      */
     void insert_sort(const _Ty & value) {
-        const_iterator itr = std::lower_bound(begin(), end(), value);
-        insert(itr, value);
+        const_iterator itr = std::lower_bound(this->begin(), this->end(), value);
+        this->insert(itr, value);
     }
 
     /**
@@ -78,8 +78,8 @@ public:
      */
     template<class _Compare>
     void insert_sort(const _Ty & value, _Compare comp) {
-        const_iterator itr = std::lower_bound(begin(), end(), value, comp);
-        insert(itr, value);
+        const_iterator itr = std::lower_bound(this->begin(), this->end(), value, comp);
+        this->insert(itr, value);
     }
 
     /**
@@ -89,9 +89,9 @@ public:
      * @retval false    既に同じものが登録されていた
      */
     bool insert_sort_unique(const _Ty & value) {
-        const_iterator itr = std::lower_bound(begin(), end(), value);
-        if (itr == end() || at(itr + 1) != value) {
-            insert(itr, value);
+        const_iterator itr = std::lower_bound(this->begin(), this->end(), value);
+        if (itr == this->end() || this->at(itr + 1) != value) {
+            this->insert(itr, value);
             return true;
         }
         return false;
@@ -102,9 +102,9 @@ public:
      */
     template<class _Compare>
     void insert_sort_unique(const _Ty & value, _Compare comp) {
-        const_iterator itr = std::lower_bound(begin(), end(), value, comp);
-        if (itr == end() || at(itr + 1) != value) {
-            insert(itr, value);
+        const_iterator itr = std::lower_bound(this->begin(), this->end(), value, comp);
+        if (itr == this->end() || this->at(itr + 1) != value) {
+            this->insert(itr, value);
         }
     }
 
@@ -113,10 +113,10 @@ public:
      * @param[in] value 削除する要素
      */
     void remove(const _Ty & value) {
-        const_iterator itr = std::find(begin(), end(), value);
-        while (itr != end()) {
-            erase(itr);
-            itr = std::find(begin(), end(), value);
+        const_iterator itr = std::find(this->begin(), this->end(), value);
+        while (itr != this->end()) {
+            this->erase(itr);
+            itr = std::find(this->begin(), this->end(), value);
         }
     }
 
@@ -125,11 +125,11 @@ public:
      * @param[in] value 削除する要素
      */
     void remove_fast(const _Ty & value) {
-        const_iterator itr = std::find(begin(), end(), value);
-        while (itr != end()) {
-            at(itr - begin()) = at(size() - 1);
-            pop_back();
-            itr = std::find(begin(), end(), value);
+        const_iterator itr = std::find(this->begin(), this->end(), value);
+        while (itr != this->end()) {
+            at(itr - this->begin()) = at(this->size() - 1);
+            this->pop_back();
+            itr = std::find(this->begin(), this->end(), value);
         }
     }
 };

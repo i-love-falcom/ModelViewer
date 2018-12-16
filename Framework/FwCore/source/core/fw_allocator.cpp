@@ -130,4 +130,19 @@ void FwFreeDebug(void * ptr) {
 }
 //-----------------------------------------------------------
 
+
+
+
+
+
+
+
+FwAllocator* FwSetAllocator(FwAllocatorTag tag, FwAllocator *allocator) {
+    return nullptr;
+}
+
+FwAllocator* FwGetAllocator(FwAllocatorTag tag) {
+    return nullptr;
+}
+
 END_NAMESPACE_FW

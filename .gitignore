@@ -1,5 +1,7 @@
 # Prerequisites
 *.d
+*.idb
+*.pdb
 
 # Compiled Object files
 *.slo
@@ -30,3 +32,15 @@
 *.exe
 *.out
 *.app
+
+# Visual Studio
+.vs
+*.log
+*.tlog
+*.suo
+*.VC.db
+*.VC.opendb
+*.VC.db-shm
+*.VC.db-wal
+
+

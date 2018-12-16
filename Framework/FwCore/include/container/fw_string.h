@@ -332,18 +332,6 @@ public:
      * @param[in] ap            引数リスト
      * @return 書き込まれた文字数
      */
-    static FW_INLINE sint32_t VSPrintf(unsigned char * dst, size_t numOfElements, const unsigned char * fmt, va_list ap) {
-        return vsprintf_s(dst, numOfElements, fmt, ap);
-    }
-
-    /**
-     * @brief 書式付き文字列の出力
-     * @param[in] dst           出力バッファ
-     * @param[in] numOfElements 出力バッファサイズ（文字数）
-     * @param[in] fmt           書式指定
-     * @param[in] ap            引数リスト
-     * @return 書き込まれた文字数
-     */
     static FW_INLINE sint32_t VSPrintf(wchar_t * dst, size_t numOfElements, const wchar_t * fmt, va_list ap) {
         return vswprintf_s(dst, numOfElements, fmt, ap);
     }
@@ -355,9 +343,9 @@ public:
      * @brief 大文字へ変換
      */
     FW_INLINE void ToUpper() {
-        _Ty dst = static_cast<_Ty>(FwMalloc(sizeof(_Ty) * size(), DefaultMallocAttribute));
-        ToUpper(dst, size(), c_str());
-        replace(0, size(), dst);
+        _Ty dst = static_cast<_Ty>(FwMalloc(sizeof(_Ty) * this->length(), _Attribute));
+        ToUpper(dst, this->length(), this->c_str());
+        this->replace(0, this->length(), dst);
         FwFree(dst);
     }
 
@@ -366,9 +354,9 @@ public:
      * @param[in] src
      */
     FW_INLINE void ToLower() {
-        _Ty dst = static_cast<_Ty>(FwMalloc(sizeof(_Ty) * size(), DefaultMallocAttribute));
-        ToLower(dst, size(), c_str());
-        replace(0, size(), dst);
+        _Ty dst = static_cast<_Ty>(FwMalloc(sizeof(_Ty) * this->length(), _Attribute));
+        ToLower(dst, this->length(), this->c_str());
+        this->replace(0, this->length(), dst);
         FwFree(dst);
     }
 
@@ -378,7 +366,7 @@ public:
      * @return 比較結果
      */
     FW_INLINE sint32_t Cmp(const _Ty s2) {
-        return Cmp(c_str(), s2);
+        return Cmp(this->c_str(), s2);
     }
 
     /**
@@ -387,7 +375,7 @@ public:
      * @return 比較結果
      */
     FW_INLINE sint32_t ICmp(const _Ty s2) {
-        return ICmp(c_str(), s2);
+        return ICmp(this->c_str(), s2);
     }
 
    /**

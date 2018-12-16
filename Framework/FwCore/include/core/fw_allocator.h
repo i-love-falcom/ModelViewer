@@ -7,6 +7,41 @@
 
 BEGIN_NAMESPACE_FW
 
+/**
+ * @enum FwAllocatorTag
+ */
+enum class FwAllocatorTag : sint32_t {
+    Default = 0,
+    Max     = 0xff,
+};
+
+/**
+ * @class FwAllocactor
+ */
+class FwAllocator {
+protected:
+
+};
+
+/**
+ * @brief メモリアロケータを登録
+ * @param[in] tag       タグ
+ * @param[in] allocator メモリアロケータ
+ * @return 以前登録されていたメモリアロケータ
+ */
+FW_DLL_FUNC FwAllocator* FwSetAllocator(FwAllocatorTag tag, FwAllocator *allocator);
+
+/**
+ * @brief 登録されているメモリアロケータを取得
+ * @param[in] tag       タグ
+ * @return 登録されているメモリアロケータ
+ */
+FW_DLL_FUNC FwAllocator* FwGetAllocator(FwAllocatorTag tag);
+
+
+
+
+
 typedef void * (*FWMallocFunc)(size_t, uint64_t, const char *, int);
 typedef void (*FWFreeFunc)(void *);
 
