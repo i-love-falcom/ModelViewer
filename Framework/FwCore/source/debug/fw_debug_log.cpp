@@ -69,13 +69,13 @@ public:
     /**
      * @brief 出力
      */
-    void VSendDebugLog(const sint32_t level, const str_t fmt, va_list ap) {
+    void VSendDebugLog(const DebugLogLevel level, const str_t fmt, va_list ap) {
         char_t logBuffer[DebugLog::kMaxLogLen + 1];
-        tstring::VSPrintf(logBuffer, ARRAY_SIZEOF(logBuffer), fmt, ap);
+        tstring::VSPrintf(logBuffer, FW_ARRAY_SIZEOF(logBuffer), fmt, ap);
 
         for (auto & listener : debugLogListeners) {
-            if (listener != nullptr && (listener->GetLogLevelMask() & level) != 0) {
-                listener->ReceiveDebugLog(static_cast<DebugLogLevel>(level), logBuffer);
+            if (listener != nullptr && (listener->GetLogLevelMask() & static_cast<sint32_t>(level)) != 0) {
+                listener->ReceiveDebugLog(level, logBuffer);
             }
         }
     }

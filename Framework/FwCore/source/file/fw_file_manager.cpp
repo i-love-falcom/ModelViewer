@@ -50,10 +50,10 @@ struct FwFileIONotification {
  */
 struct FwFileIOCommand {
     enum {
-        kFlagFileRead       = BIT32(0),
-        kFlagFileWrite      = BIT32(1),
-        kFlagFileSeek       = BIT32(2),
-        kFlagNotification   = BIT32(3),
+        kFlagFileRead       = FW_BIT32(0),
+        kFlagFileWrite      = FW_BIT32(1),
+        kFlagFileSeek       = FW_BIT32(2),
+        kFlagNotification   = FW_BIT32(3),
     };
 
     FwFile          _fp;
@@ -276,13 +276,13 @@ class FileManagerImpl : public FwFileManager {
 public:
     // 初期化
     void Init(FwFileManagerDesc * desc) {
-        FwPath::GetCurrentDir(basePath, ARRAY_SIZEOF(basePath));
+        FwPath::GetCurrentDir(basePath, FW_ARRAY_SIZEOF(basePath));
 
         FwThreadDesc threadDesc;
         threadDesc.Init();
         threadDesc.affinity = desc->_threadAffinity;
         threadDesc.priority = desc->_threadPriority;
-        string::Copy(threadDesc.name, ARRAY_SIZEOF(threadDesc.name), _T("FileIO Thread"));
+        string::Copy(threadDesc.name, FW_ARRAY_SIZEOF(threadDesc.name), _T("FileIO Thread"));
 
         fileIOThread._sharedBuffer = &this->sharedBuffer;
         fileIOThread.StartWorker(&threadDesc);
@@ -305,14 +305,14 @@ public:
         stream->fileHandle = fp;
         stream->priority = priority;
         stream->fileIOThread = &fileIOThread;
-        string::Copy(stream->filePath, ARRAY_SIZEOF(stream->filePath), filePath);
+        string::Copy(stream->filePath, FW_ARRAY_SIZEOF(stream->filePath), filePath);
 
         return stream;
     }
 
     // 基準となるパスをセット
     virtual void DoSetBasePath(const str_t path) FW_OVERRIDE {
-        string::Copy(basePath, ARRAY_SIZEOF(basePath), path);
+        string::Copy(basePath, FW_ARRAY_SIZEOF(basePath), path);
     }
 
     // 基準となるパスを取得

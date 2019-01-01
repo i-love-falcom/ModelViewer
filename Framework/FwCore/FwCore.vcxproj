@@ -40,7 +40,6 @@
     <ClInclude Include="include\file\fw_file_types.h" />
     <ClInclude Include="include\file\fw_path.h" />
     <ClInclude Include="include\fw_core.h" />
-    <ClInclude Include="include\misc\fw_fsm.h" />
     <ClInclude Include="include\misc\fw_noncopyable.h" />
     <ClInclude Include="include\resource\fw_resource.h" />
     <ClInclude Include="include\resource\fw_resource_manager.h" />

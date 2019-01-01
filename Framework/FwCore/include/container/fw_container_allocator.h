@@ -10,22 +10,28 @@
 
 BEGIN_NAMESPACE_FW
 
-template<class _Ty, uint64_t _Attribute = defaultFwMallocAttribute>
+template<class _Ty, uint32_t _Tag = FwDefaultAllocatorTag>
 class allocator {
 public:
-    typedef _Ty                 value_type;
-    typedef value_type *        pointer;
-    typedef const value_type *  const_pointer;
-    typedef void *              void_pointer;
-    typedef const void *        const_void_pointer;
-    typedef value_type &        reference;
-    typedef const value_type &  const_reference;
-    typedef size_t              size_type;
-    typedef ptrdiff_t           difference_type;
+    using value_type            = _Ty;
+    using size_type             = std::size_t;
+    using difference_type       = std::ptrdiff_t;
+
+    // since C++14
+    using propagate_on_container_move_assignment = std::true_type;
+
+    // deprecated in C++17, removed in C++20
+    using pointer           = _Ty*;
+    using const_pointer     = const _Ty*;
+    using reference         = _Ty & ;
+    using const_reference   = const _Ty&;
+
+    // since C++17
+    using is_always_equal   = std::true_type;
 
     template<class _Other>
     struct rebind {
-        typedef allocator<_Other, _Attribute> other;
+        typedef allocator<_Other, _Tag> other;
     };
 
     pointer address(reference _Val) const throw() {
@@ -37,7 +43,7 @@ public:
     }
 
     pointer allocate(size_type _Count) {
-        return reinterpret_cast<pointer>(FwMalloc(_Count * sizeof (_Ty), _Attribute));
+        return reinterpret_cast<pointer>(FwMalloc(_Count * sizeof (_Ty), _Tag));
     }
 
     pointer allocate(size_type _Count, const void *) {
@@ -66,18 +72,18 @@ public:
     }
 
     template<class _Other>
-	allocator<_Ty, _Attribute> & operator =(const allocator<_Other, _Attribute>&) {
+	allocator<_Ty, _Tag> & operator =(const allocator<_Other, _Tag>&) {
 	    return (*this);
 	}
 
     allocator() throw() {
     }
     
-    allocator(const allocator<_Ty, _Attribute> &) throw() {
+    allocator(const allocator<_Ty, _Tag> &) throw() {
     }
 	
     template<class _Other>
-	allocator(const allocator<_Other, _Attribute> &) throw() {
+	allocator(const allocator<_Other, _Tag> &) throw() {
 	}
 };
 
@@ -113,13 +119,13 @@ public:
     }
 };
 
-template<class _Ty,	class _Other, uint64_t _Attribute, uint64_t _OtherAttribute>
-FW_INLINE bool operator ==(const allocator<_Ty, _Attribute>&, const allocator<_Other, _OtherAttribute>&) throw() {
-    return (true);
+template<class _Ty,	class _Other, uint32_t _Tag, uint32_t _OtherTag>
+FW_INLINE bool operator ==(const allocator<_Ty, _Tag> &_Left, const allocator<_Other, _OtherTag> &_Right) throw() {
+    return (_Left == _Right);
 }
 
-template<class _Ty, class _Other, uint64_t _Attribute, uint64_t _OtherAttribute>
-FW_INLINE bool operator !=(const allocator<_Ty, _Attribute>& _Left, const allocator<_Other, _OtherAttribute>& _Right) throw() {
+template<class _Ty, class _Other, uint32_t _Tag, uint32_t _OtherTag>
+FW_INLINE bool operator !=(const allocator<_Ty, _Tag> &_Left, const allocator<_Other, _OtherTag> &_Right) throw() {
     return (!(_Left == _Right));
 }
 

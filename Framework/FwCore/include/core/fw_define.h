@@ -8,7 +8,7 @@
 //---------------------------------------------
 // defined platform
 //---------------------------------------------
-#if defined(WIN32) || defined(WIN64)
+#if defined(WIN32) || defined(WIN64) || defined(__WIN32__)
     #define FW_PLATFORM_WIN32           (1)
     #if defined(WIN64)
         #define FW_PLATFORM_WIN64       (1)
@@ -71,6 +71,7 @@
     #elif TARGET_RT_BIG_ENDIAN
         #define FW_BIG_ENDIAN           (1)
     #endif
+#elif defined(__linux__)
 #else
     #error Unsupported platform
 #endif
@@ -202,16 +203,55 @@
 //---------------------------------------------
 // macro
 //---------------------------------------------
-#define ARRAY_SIZEOF(__x)               (sizeof(__x) / sizeof((__x)[0]))
+#define FW_ARRAY_SIZEOF(__x)            (sizeof(__x) / sizeof((__x)[0]))
 
-#define SAFE_ADDREF(x__)		        if ((x__) != nullptr) {(x__)->AddRef();}
-#define SAFE_RELEASE(x__)               if ((x__) != nullptr) {(x__)->Release(); (x__) = nullptr;}
+#define FW_SAFE_ADDREF(__x)             if ((__x) != nullptr) {(__x)->AddRef();}
+#define FW_SAFE_RELEASE(__x)            if ((__x) != nullptr) {(__x)->Release(); (__x) = nullptr;}
 
-#define SAFE_DELETE(x__)                if ((x__) != nullptr) {delete (x__); (x__) = nullptr;}
-#define SAFE_ARRAY_DELETE(x__)          if ((x__) != nullptr) {delete[] (x__); (x__) = nullptr;}
+template<typename T>
+constexpr T FwBitShift(size_t shift) {
+    return static_cast<T>(1) << shift;
+}
 
-#define BIT32(x__)                      (1UL << (x__))
-#define BIT64(x__)                      (1ULL << (x__))
+#define FW_BIT32(__x)                   FwBitShift<uint32_t>(static_cast<size_t>(__x))
+#define FW_BIT64(__x)                   FwBitShift<uint64_t>(static_cast<size_t>(__x))
+
+#define FW_DEFINE_ENUM_BITFLAG(T)                                               \
+    constexpr T operator|(const T lhs, const T rhs) {                           \
+        using U = typename std::underlying_type<T>::type;                       \
+        return static_cast<T>(static_cast<U>(lhs) | static_cast<U>(rhs));       \
+    }                                                                           \
+                                                                                \
+    constexpr T operator&(const T lhs, const T rhs) {                           \
+        using U = typename std::underlying_type<T>::type;                       \
+        return static_cast<T>(static_cast<U>(lhs) & static_cast<U>(rhs));       \
+    }                                                                           \
+                                                                                \
+    constexpr T operator^(const T lhs, const T rhs) {                           \
+        using U = typename std::underlying_type<T>::type;                       \
+        return static_cast<T>(static_cast<U>(lhs) ^ static_cast<U>(rhs));       \
+    }                                                                           \
+                                                                                \
+    constexpr T operator~(const T val) {                                        \
+        using U = typename std::underlying_type<T>::type;                       \
+        return static_cast<T>(~static_cast<U>(val));                            \
+    }                                                                           \
+                                                                                \
+    inline T& operator|=(T& lhs, const T& rhs) {                                \
+        using U = typename std::underlying_type<T>::type;                       \
+        return lhs = static_cast<T>(static_cast<U>(lhs) | static_cast<U>(rhs)); \
+    }                                                                           \
+                                                                                \
+    inline T& operator&=(T& lhs, const T& rhs) {                                \
+        using U = typename std::underlying_type<T>::type;                       \
+        return lhs = static_cast<T>(static_cast<U>(lhs) & static_cast<U>(rhs)); \
+    }                                                                           \
+                                                                                \
+    inline T& operator^=(T& lhs, const T& rhs) {                                \
+        using U = typename std::underlying_type<T>::type;                       \
+        return lhs = static_cast<T>(static_cast<U>(lhs) ^ static_cast<U>(rhs)); \
+    }
+
 
 #ifndef __T
     #if FW_UNICODE
@@ -249,42 +289,47 @@ T DYNAMIC_CAST(U ptr) {
 }
 
 template<typename T>
-T Min(T a, T b) {
+constexpr T Min(T a, T b) {
     return a < b ? a : b;
 }
 
 template<typename T>
-T Max(T a, T b) {
+constexpr T Max(T a, T b) {
     return a > b ? a : b;
 }
 
 template<typename T>
-T Min3(T a, T b, T c) {
+constexpr T Min3(T a, T b, T c) {
     return a < b ? (a < c ? a : c) : (b < c ? b : c);
 }
 
 template<typename T>
-T Max3(T a, T b, T c) {
+constexpr T Max3(T a, T b, T c) {
     return a > b ? (a > c ? a : c) : (b > c ? b : c);
 }
 
 template<typename T>
-T Clamp(T v, T min, T max) {
+constexpr T Clamp(T v, T min, T max) {
     return Min<T>(Max<T>(v, min), max);
 }
 
 template<typename T, typename U>
-T RoundUp(T ref, const U align) {
+constexpr T RoundUp(T ref, const U align) {
     //    const T a = static_cast<const T>(align - 1);
     //    return (ref + a) & ~a;
     return (ref + static_cast<const T>(align - 1)) / static_cast<const T>(align) * static_cast<const T>(align);
 }
 
 template<typename T, typename U>
-T RoundDown(T ref, const U align) {
+constexpr T RoundDown(T ref, const U align) {
     //    const T a = static_cast<const T>(align - 1);
     //    return ref & ~a;
     return ref / static_cast<const T>(align) * static_cast<const T>(align);
+}
+
+template<typename T>
+bool IsPowerOfTwo(T number) {
+    return ((number != 0) && ((number & (number - 1)) == 0));
 }
 
 #endif // FW_DEFINE_H_

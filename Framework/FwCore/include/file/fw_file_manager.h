@@ -50,7 +50,7 @@ public:
      */
     FW_INLINE FwFileStream * FileStreamOpen(const str_t relativePath, const str_t fileName, const sint32_t options, const uint32_t priority = kFilePriorityNormal) {
         char_t tmpPath[FwPath::kMaxPathLen + 1];
-        return DoFileStreamOpen(FwPath::Combine(tmpPath, ARRAY_SIZEOF(tmpPath), GetBasePath(), relativePath, fileName), options, priority);
+        return DoFileStreamOpen(FwPath::Combine(tmpPath, FW_ARRAY_SIZEOF(tmpPath), GetBasePath(), relativePath, fileName), options, priority);
     }
 
     /**
@@ -61,7 +61,7 @@ public:
      */
     FW_INLINE FwFileStream * FileStreamOpen(const str_t fileName, const sint32_t options) {
         char_t tmpPath[FwPath::kMaxPathLen + 1];
-        return DoFileStreamOpen(FwPath::Combine(tmpPath, ARRAY_SIZEOF(tmpPath), GetBasePath(), fileName), options, kFilePriorityNormal);
+        return DoFileStreamOpen(FwPath::Combine(tmpPath, FW_ARRAY_SIZEOF(tmpPath), GetBasePath(), fileName), options, kFilePriorityNormal);
     }
 
     /**

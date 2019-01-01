@@ -68,7 +68,7 @@ void MainThread::Shutdown() {
 }
 
 void MainThread::StartMainThread(const str_t name) {
-    args = FwMalloc(sizeof(MainThreadArgs), defaultFwMallocAttribute);
+    args = FwNew<MainThreadArgs>();
     FwAssert(args != nullptr);
 
     reinterpret_cast<MainThreadArgs *>(args)->Init(this);
@@ -79,7 +79,7 @@ void MainThread::StartMainThread(const str_t name) {
     desc.stackSize  = MainThread::kDefaultStackSize;
     desc.priority   = kTheadPriorityNormal;
     desc.affinity   = DefaultFwThreadAffinity;
-    tstring::SPrintf(desc.name, ARRAY_SIZEOF(desc.name), name);
+    tstring::SPrintf(desc.name, FW_ARRAY_SIZEOF(desc.name), name);
 
     Start(&desc);
 }

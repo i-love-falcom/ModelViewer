@@ -101,9 +101,6 @@
     <ClInclude Include="include\file\fw_file_stream.h">
       <Filter>header files\file</Filter>
     </ClInclude>
-    <ClInclude Include="include\misc\fw_fsm.h">
-      <Filter>header files\misc</Filter>
-    </ClInclude>
     <ClInclude Include="include\core\fw_thread.h">
       <Filter>header files\core</Filter>
     </ClInclude>
@@ -118,6 +115,9 @@
     </ClInclude>
     <ClInclude Include="include\resource\fw_resource_manager.h">
       <Filter>header files\resource</Filter>
+    </ClInclude>
+    <ClInclude Include="include\core\fw_build_config.h">
+      <Filter>header files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

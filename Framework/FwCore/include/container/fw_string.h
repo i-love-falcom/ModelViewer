@@ -12,11 +12,8 @@
 
 BEGIN_NAMESPACE_FW
 
-template<
-    typename _Ty,
-    uint64_t _Attribute = defaultFwMallocAttribute
->
-class basic_string : public std::basic_string<_Ty, std::char_traits<_Ty>, NAMESPACE_FW allocator<_Ty, _Attribute> > {
+template<typename _Ty, uint32_t _Tag = FwDefaultAllocatorTag>
+class basic_string : public std::basic_string<_Ty, std::char_traits<_Ty>, NAMESPACE_FW allocator<_Ty, _Tag> > {
 public:
 #if defined(FW_PLATFORM_WIN32)
     /**
@@ -343,7 +340,7 @@ public:
      * @brief 大文字へ変換
      */
     FW_INLINE void ToUpper() {
-        _Ty dst = static_cast<_Ty>(FwMalloc(sizeof(_Ty) * this->length(), _Attribute));
+        _Ty dst = static_cast<_Ty>(FwMalloc(sizeof(_Ty) * this->length(), _Tag));
         ToUpper(dst, this->length(), this->c_str());
         this->replace(0, this->length(), dst);
         FwFree(dst);
@@ -354,7 +351,7 @@ public:
      * @param[in] src
      */
     FW_INLINE void ToLower() {
-        _Ty dst = static_cast<_Ty>(FwMalloc(sizeof(_Ty) * this->length(), _Attribute));
+        _Ty dst = static_cast<_Ty>(FwMalloc(sizeof(_Ty) * this->length(), _Tag));
         ToLower(dst, this->length(), this->c_str());
         this->replace(0, this->length(), dst);
         FwFree(dst);
@@ -388,8 +385,8 @@ public:
         size_t s1Len = Length(s1) + 1;
         size_t s2Len = Length(s2) + 1;
 
-        char * dstS1 = reinterpret_cast<char *>(FwMalloc(sizeof(char *) * s1Len, _Attribute));
-        char * dstS2 = reinterpret_cast<char *>(FwMalloc(sizeof(char *) * s2Len, _Attribute));
+        char * dstS1 = reinterpret_cast<char *>(FwMalloc(sizeof(char *) * s1Len, _Tag));
+        char * dstS2 = reinterpret_cast<char *>(FwMalloc(sizeof(char *) * s2Len, _Tag));
 
         ToUpper(dstS1, s1Len, s1);
         ToUpper(dstS2, s2Len, s2);
@@ -412,8 +409,8 @@ public:
         size_t s1Len = Length(s1) + 1;
         size_t s2Len = Length(s2) + 1;
 
-        unsigned char * dstS1 = reinterpret_cast<unsigned char *>(FwMalloc(sizeof(unsigned char *) * s1Len, _Attribute));
-        unsigned char * dstS2 = reinterpret_cast<unsigned char *>(FwMalloc(sizeof(unsigned char *) * s2Len, _Attribute));
+        unsigned char * dstS1 = reinterpret_cast<unsigned char *>(FwMalloc(sizeof(unsigned char *) * s1Len, _Tag));
+        unsigned char * dstS2 = reinterpret_cast<unsigned char *>(FwMalloc(sizeof(unsigned char *) * s2Len, _Tag));
 
         ToUpper(dstS1, s1Len, s1);
         ToUpper(dstS2, s2Len, s2);
@@ -437,8 +434,8 @@ public:
         size_t s1Len = Length(s1) + 1;
         size_t s2Len = Length(s2) + 1;
 
-        wchar_t * dstS1 = reinterpret_cast<wchar_t *>(FwMalloc(sizeof(wchar_t *) * s1Len, _Attribute));
-        wchar_t * dstS2 = reinterpret_cast<wchar_t *>(FwMalloc(sizeof(wchar_t *) * s2Len, _Attribute));
+        wchar_t * dstS1 = reinterpret_cast<wchar_t *>(FwMalloc(sizeof(wchar_t *) * s1Len, _Tag));
+        wchar_t * dstS2 = reinterpret_cast<wchar_t *>(FwMalloc(sizeof(wchar_t *) * s2Len, _Tag));
 
         ToUpper(dstS1, s1Len, s1);
         ToUpper(dstS2, s2Len, s2);

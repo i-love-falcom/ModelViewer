@@ -10,25 +10,27 @@ BEGIN_NAMESPACE_FW
 /**
  * @enum DebugLogLevel
  */
-enum DebugLogLevel {
-    kDebugLogLevelFatalError,   ///< 致命的なエラー
-    kDebugLogLevelError,        ///< エラー
-    kDebugLogLevelWarning,      ///< 警告
-    kDebugLogLevelInfo,         ///< 情報
-    kDebugLogLevelDebug,        ///< デバッグ
+    enum class DebugLogLevel : uint32_t {
+    kFatalError,   ///< 致命的なエラー
+    kError,        ///< エラー
+    kWarning,      ///< 警告
+    kInfo,         ///< 情報
+    kDebug,        ///< デバッグ
     
-    kDebugLogLevelCount
+    kCount
 };
+
+FW_DEFINE_ENUM_BITFLAG(DebugLogLevel)
 
 /**
  * @enum DebugLogLevelMask
  */
 enum DebugLogLevelMask {
-    kDebugLogLevelMaskFatalError    = BIT32(kDebugLogLevelFatalError),
-    kDebugLogLevelMaskError         = BIT32(kDebugLogLevelError),
-    kDebugLogLevelMaskWarning       = BIT32(kDebugLogLevelWarning),
-    kDebugLogLevelMaskInfo          = BIT32(kDebugLogLevelInfo),
-    kDebugLogLevelMaskDebug         = BIT32(kDebugLogLevelDebug),
+    kDebugLogLevelMaskFatalError    = FW_BIT32(DebugLogLevel::kFatalError),
+    kDebugLogLevelMaskError         = FW_BIT32(DebugLogLevel::kError),
+    kDebugLogLevelMaskWarning       = FW_BIT32(DebugLogLevel::kWarning),
+    kDebugLogLevelMaskInfo          = FW_BIT32(DebugLogLevel::kInfo),
+    kDebugLogLevelMaskDebug         = FW_BIT32(DebugLogLevel::kDebug),
     
     kDebugLogLevelMaskAll           = 0xff
 };
@@ -37,9 +39,9 @@ enum DebugLogLevelMask {
  * @enum DebugLogOptions
  */
 enum DebugLogOptions {
-    kDebugLogOptProcessID           = BIT32(0), ///< ProcessIDを出力に含める
-    kDebugLogOptThreadID            = BIT32(1), ///< ThreadIDを出力含める
-    kDebugLogOptNoWait              = BIT32(2), ///< スレッドを使用せずにすぐに書き出す
+    kDebugLogOptProcessID           = FW_BIT32(0), ///< ProcessIDを出力に含める
+    kDebugLogOptThreadID            = FW_BIT32(1), ///< ThreadIDを出力含める
+    kDebugLogOptNoWait              = FW_BIT32(2), ///< スレッドを使用せずにすぐに書き出す
 
     kDebugLogOptDefault             = kDebugLogOptProcessID | kDebugLogOptThreadID
 };

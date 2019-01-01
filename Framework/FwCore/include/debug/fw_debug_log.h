@@ -77,7 +77,7 @@ public:
     static FW_INLINE void FatalError(const str_t fmt, ...) {
         va_list vl;
         va_start(vl, fmt);
-        VSendDebugLog(kDebugLogLevelFatalError, fmt, vl);
+        VSendDebugLog(DebugLogLevel::kFatalError, fmt, vl);
         va_end(vl);
     }
 
@@ -87,7 +87,7 @@ public:
     static FW_INLINE void Error(const str_t fmt, ...) {
         va_list vl;
         va_start(vl, fmt);
-        VSendDebugLog(kDebugLogLevelError, fmt, vl);
+        VSendDebugLog(DebugLogLevel::kError, fmt, vl);
         va_end(vl);
     }
 
@@ -97,7 +97,7 @@ public:
     static FW_INLINE void Warning(const str_t fmt, ...) {
         va_list vl;
         va_start(vl, fmt);
-        VSendDebugLog(kDebugLogLevelWarning, fmt, vl);
+        VSendDebugLog(DebugLogLevel::kWarning, fmt, vl);
         va_end(vl);
     }
 
@@ -107,7 +107,7 @@ public:
     static FW_INLINE void Info(const str_t fmt, ...) {
         va_list vl;
         va_start(vl, fmt);
-        VSendDebugLog(kDebugLogLevelInfo, fmt, vl);
+        VSendDebugLog(DebugLogLevel::kInfo, fmt, vl);
         va_end(vl);
     }
 
@@ -117,7 +117,7 @@ public:
     static FW_INLINE void Debug(const str_t fmt, ...) {
         va_list vl;
         va_start(vl, fmt);
-        VSendDebugLog(kDebugLogLevelDebug, fmt, vl);
+        VSendDebugLog(DebugLogLevel::kDebug, fmt, vl);
         va_end(vl);
     }
 

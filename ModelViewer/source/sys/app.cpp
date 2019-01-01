@@ -12,7 +12,7 @@ USING_NAMESPACE_FW
 
 
 BEGIN_NAMESPACE_NONAME
-static const str_t  s_debugLogLevelString[kDebugLogLevelCount] = {
+static const str_t  s_debugLogLevelString[static_cast<uint32_t>(DebugLogLevel::kCount)] = {
     _T("FatalError"),
     _T("Error"),
     _T("Warning"),
@@ -28,7 +28,7 @@ class DefaultDebugLogListener : public DebugLogListener {
 public:
     virtual sint32_t ReceiveDebugLog(const DebugLogLevel level, const str_t msg) FW_OVERRIDE {
         char_t log[DebugLog::kMaxLogLen + 1];
-        tstring::SPrintf(log, ARRAY_SIZEOF(log), _T("%s : %s"), s_debugLogLevelString[level], msg);
+        tstring::SPrintf(log, FW_ARRAY_SIZEOF(log), _T("%s : %s"), s_debugLogLevelString[static_cast<uint32_t>(level)], msg);
 
 #if defined(FW_PLATFORM_WIN32)
         ::OutputDebugString(log);
@@ -68,7 +68,7 @@ void App::Initialize(AppParms & parms, CommandLineArgs & args) {
     cmdShow         = parms.cmdShow;
 
     // アプリ名をセット
-    NAMESPACE_FW tstring::SPrintf(appName, ARRAY_SIZEOF(appName), _T("ModelViewer"));
+    NAMESPACE_FW tstring::SPrintf(appName, FW_ARRAY_SIZEOF(appName), _T("ModelViewer"));
 
     WNDCLASSEX wcex;
 

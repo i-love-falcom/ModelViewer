@@ -12,12 +12,12 @@
 
 BEGIN_NAMESPACE_FW
 
-template<class _Ty, uint64_t _Attribute = defaultFwMallocAttribute>
-class vector : public std::vector<_Ty, NAMESPACE_FW allocator<_Ty, _Attribute> > {
+template<class _Ty, uint32_t _Tag = FwDefaultAllocatorTag>
+class vector : public std::vector<_Ty, NAMESPACE_FW allocator<_Ty, _Tag> > {
 public:
-    typedef vector<_Ty, _Attribute>                                     _My;
-    typedef std::vector<_Ty, NAMESPACE_FW allocator<_Ty, _Attribute> >  _MyBase;
-    typedef allocator<_Ty, _Attribute>                                  _Alloc;
+    typedef vector<_Ty, _Tag>                                       _My;
+    typedef std::vector<_Ty, NAMESPACE_FW allocator<_Ty, _Tag> >    _MyBase;
+    typedef allocator<_Ty, _Tag>                                    _Alloc;
 
     typedef _Alloc                                      allocator_type;
     typedef _MyBase::reference                          reference;

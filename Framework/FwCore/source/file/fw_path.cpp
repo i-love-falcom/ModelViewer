@@ -31,7 +31,7 @@ static bool CheckValidFileName(const str_t path) {
 
     bool valid = true;
     for (size_t i = 0; i < pathLen; ++i) {
-        for (size_t k = 0; k < ARRAY_SIZEOF(s_invalidFileNameChars); ++k) {
+        for (size_t k = 0; k < FW_ARRAY_SIZEOF(s_invalidFileNameChars); ++k) {
             if (path[i] == s_invalidFileNameChars[k]) {
                 valid = false;
                 break;
@@ -52,7 +52,7 @@ static bool CheckValidPath(const str_t path) {
 
     bool valid = true;
     for (size_t i = 0; i < pathLen; ++i) {
-        for (size_t k = 0; k < ARRAY_SIZEOF(s_invalidPathChars); ++k) {
+        for (size_t k = 0; k < FW_ARRAY_SIZEOF(s_invalidPathChars); ++k) {
             if (path[i] == s_invalidPathChars[k]) {
                 valid = false;
                 break;
@@ -108,7 +108,7 @@ const char_t * FwPath::GetInvalidFileNameChars() {
 }
 
 size_t FwPath::GetNumInvalidFileNameChars() {
-    return ARRAY_SIZEOF(s_invalidFileNameChars);
+    return FW_ARRAY_SIZEOF(s_invalidFileNameChars);
 }
 
 const char_t * FwPath::GetInvalidPathChars() {
@@ -116,7 +116,7 @@ const char_t * FwPath::GetInvalidPathChars() {
 }
 
 size_t FwPath::GetNumInvalidPathChars() {
-    return ARRAY_SIZEOF(s_invalidPathChars);
+    return FW_ARRAY_SIZEOF(s_invalidPathChars);
 }
 
 str_t FwPath::GetUserDir(str_t buffer, const size_t numOfElements) {
@@ -301,7 +301,7 @@ str_t FwPath::MakeTempFileNameWithDir(str_t buffer, const size_t numOfElements, 
     FwAssert(name != nullptr);
 
     char_t tmpPath[kMaxPathLen];
-    GetTempDir(tmpPath, ARRAY_SIZEOF(tmpPath));
+    GetTempDir(tmpPath, FW_ARRAY_SIZEOF(tmpPath));
 
     tstring::SPrintf(buffer, sizeof(char_t) * numOfElements, _T("%s%s"), tmpPath, name);
 
@@ -314,7 +314,7 @@ str_t FwPath::MakeTempFileNameWithDir(str_t buffer, const size_t numOfElements, 
     FwAssert(name != nullptr);
 
     char_t tmpPath[kMaxPathLen];
-    GetTempDir(tmpPath, ARRAY_SIZEOF(tmpPath));
+    GetTempDir(tmpPath, FW_ARRAY_SIZEOF(tmpPath));
 
     tstring::SPrintf(buffer, sizeof(char_t) * numOfElements, _T("%s%s%08x"), tmpPath, name, index);
 

@@ -174,7 +174,7 @@ void FwThread::StartThread(const bool workerThread) {
 
 #if defined(FW_UNICODE)
     size_t dstResult = 0;
-    tstring::WCharToChar(&dstResult, threadInfo->name, ARRAY_SIZEOF(threadInfo->name), desc.name, ARRAY_SIZEOF(desc.name));
+    tstring::WCharToChar(&dstResult, threadInfo->name, FW_ARRAY_SIZEOF(threadInfo->name), desc.name, FW_ARRAY_SIZEOF(desc.name));
 #endif
 
 #if FW_THREAD == FW_THREAD_WIN32

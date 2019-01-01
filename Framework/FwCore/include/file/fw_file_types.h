@@ -33,28 +33,28 @@ enum FwFileOptionBits : uint32_t {
  * @enum FwFileOptions
  */
 enum FwFileOptions : uint32_t {
-    kFileOptAccessRead          = BIT32(kFileOptAccessReadShiftBits),           ///< 読み込みアクセス
-    kFileOptAccessWrite         = BIT32(kFileOptAccessWriteShiftBites),         ///< 書き込みアクセス
+    kFileOptAccessRead          = FW_BIT32(kFileOptAccessReadShiftBits),           ///< 読み込みアクセス
+    kFileOptAccessWrite         = FW_BIT32(kFileOptAccessWriteShiftBites),         ///< 書き込みアクセス
     kFileOptAccessRW            = (kFileOptAccessRead | kFileOptAccessWrite),   ///< 読み書きマスク
     kFileOptAccessMask          = (kFileOptAccessRead | kFileOptAccessWrite),   ///< アクセス方法マスク
 
-    kFileOptSharedRead          = BIT32(kFileOptSharedReadShiftBits),           ///< 他プロセスと読み込み共有
-    kFileOptSharedWrite         = BIT32(kFileOptSharedWriteShiftBites),         ///< 他プロセスと書き込み共有
+    kFileOptSharedRead          = FW_BIT32(kFileOptSharedReadShiftBits),           ///< 他プロセスと読み込み共有
+    kFileOptSharedWrite         = FW_BIT32(kFileOptSharedWriteShiftBites),         ///< 他プロセスと書き込み共有
     kFileOptSharedRW            = (kFileOptSharedRead | kFileOptSharedWrite),   ///< 読み書き共有
     kFileOptSharedMask          = (kFileOptSharedRead | kFileOptSharedWrite),   ///< 共有方法マスク
 
-    kFileOptAttributeEncrypted  = BIT32(kFileOptAttributeEncryptedShiftBits),   ///< 暗号化属性
-    kFileOptAttributeHidden     = BIT32(kFileOptAttributeHiddenShiftBits),      ///< 隠しファイル属性
-    kFileOptAttributeReadOnly   = BIT32(kFileOptAttributeReadOnlyShiftBits),    ///< 読み込み専用属性
-    kFileOptAttributeTemporary  = BIT32(kFileOptAttributeTemporaryShiftBits),   ///< 一時ファイル
+    kFileOptAttributeEncrypted  = FW_BIT32(kFileOptAttributeEncryptedShiftBits),   ///< 暗号化属性
+    kFileOptAttributeHidden     = FW_BIT32(kFileOptAttributeHiddenShiftBits),      ///< 隠しファイル属性
+    kFileOptAttributeReadOnly   = FW_BIT32(kFileOptAttributeReadOnlyShiftBits),    ///< 読み込み専用属性
+    kFileOptAttributeTemporary  = FW_BIT32(kFileOptAttributeTemporaryShiftBits),   ///< 一時ファイル
     kFileOptAttributeMask       = (kFileOptAttributeEncrypted | kFileOptAttributeHidden | kFileOptAttributeReadOnly | kFileOptAttributeTemporary),  ///< 属性マスク
 
-    kFileOptFlagRandomAccess    = BIT32(kFileOptFlagRandomAccessShiftBits),     ///< ランダムアクセスに最適化
-    kFileOptFlagSequential      = BIT32(kFileOptFlagSequentialShiftBits),       ///< シーケンシャルアクセスに最適化
-    kFileOptFlagDeleteOnClose   = BIT32(kFileOptFlagDeleteOnCloseShiftBits),    ///< ファイルクローズ時に自動的に削除
+    kFileOptFlagRandomAccess    = FW_BIT32(kFileOptFlagRandomAccessShiftBits),     ///< ランダムアクセスに最適化
+    kFileOptFlagSequential      = FW_BIT32(kFileOptFlagSequentialShiftBits),       ///< シーケンシャルアクセスに最適化
+    kFileOptFlagDeleteOnClose   = FW_BIT32(kFileOptFlagDeleteOnCloseShiftBits),    ///< ファイルクローズ時に自動的に削除
     kFileOptFlagMask            = (kFileOptFlagRandomAccess | kFileOptFlagSequential | kFileOptFlagDeleteOnClose),    ///< フラグマスク
 
-    kFileOptFlagNoClose         = BIT32(kFileOptFlagNoCloseShiftBits),          ///< ファイルクローズしない
+    kFileOptFlagNoClose         = FW_BIT32(kFileOptFlagNoCloseShiftBits),          ///< ファイルクローズしない
 };
 
 /**

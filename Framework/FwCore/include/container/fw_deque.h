@@ -12,12 +12,12 @@
 
 BEGIN_NAMESPACE_FW
 
-template<class _Ty, uint64_t _Attribute = defaultFwMallocAttribute >
-class deque : public std::deque<_Ty, NAMESPACE_FW allocator<_Ty, _Attribute> > {
+template<class _Ty, uint32_t _Tag = FwDefaultAllocatorTag >
+class deque : public std::deque<_Ty, NAMESPACE_FW allocator<_Ty, _Tag> > {
 public:
-    typedef deque<_Ty, _Attribute>                                      _My;
-    typedef std::deque<_Ty, NAMESPACE_FW allocator<_Ty, _Attribute> >   _MyBase;
-    typedef allocator<_Ty, _Attribute>                                  _Alloc;
+    typedef deque<_Ty, _Tag>                                        _My;
+    typedef std::deque<_Ty, NAMESPACE_FW allocator<_Ty, _Tag> >     _MyBase;
+    typedef allocator<_Ty, _Tag>                                    _Alloc;
 
     typedef _Alloc                                      allocator_type;
     typedef _MyBase::reference                          reference;
