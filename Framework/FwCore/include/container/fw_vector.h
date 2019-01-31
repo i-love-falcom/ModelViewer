@@ -12,7 +12,7 @@
 
 BEGIN_NAMESPACE_FW
 
-template<class _Ty, uint32_t _Tag = FwDefaultAllocatorTag>
+template<class _Ty, uint32_t _Tag = FwDefaultMemAllocatorTag>
 class vector : public std::vector<_Ty, NAMESPACE_FW allocator<_Ty, _Tag> > {
 public:
     typedef vector<_Ty, _Tag>                                       _My;

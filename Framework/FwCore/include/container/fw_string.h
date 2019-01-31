@@ -12,7 +12,7 @@
 
 BEGIN_NAMESPACE_FW
 
-template<typename _Ty, uint32_t _Tag = FwDefaultAllocatorTag>
+template<typename _Ty, uint32_t _Tag = FwDefaultMemAllocatorTag>
 class basic_string : public std::basic_string<_Ty, std::char_traits<_Ty>, NAMESPACE_FW allocator<_Ty, _Tag> > {
 public:
 #if defined(FW_PLATFORM_WIN32)

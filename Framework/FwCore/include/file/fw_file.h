@@ -122,7 +122,7 @@ public:
     */
     static FW_INLINE FwFile StdInputDevice() {
         FwFile file;
-        file.options = kFileOptFlagNoClose;
+        file.options = FwFileOptFlagNoClose;
 
 #if FW_FILE == FW_FILE_WIN32
         file.nativeHandle = ::GetStdHandle(STD_INPUT_HANDLE);
@@ -137,7 +137,7 @@ public:
      */
     static FW_INLINE FwFile StdOutputDevice() {
         FwFile file;
-        file.options = kFileOptFlagNoClose;
+        file.options = FwFileOptFlagNoClose;
 
 #if FW_FILE == FW_FILE_WIN32
         file.nativeHandle = ::GetStdHandle(STD_OUTPUT_HANDLE);
@@ -152,7 +152,7 @@ public:
      */
     static FW_INLINE FwFile StdErrorDevice() {
         FwFile file;
-        file.options = kFileOptFlagNoClose;
+        file.options = FwFileOptFlagNoClose;
 
 #if FW_FILE == FW_FILE_WIN32
         file.nativeHandle = ::GetStdHandle(STD_ERROR_HANDLE);

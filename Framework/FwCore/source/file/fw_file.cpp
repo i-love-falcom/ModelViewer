@@ -10,7 +10,7 @@
 BEGIN_NAMESPACE_FW
 
 sint32_t FwFileOpen(const str_t name, const uint32_t options, FwFile & fp) {
-    if (name == nullptr || (options & kFileOptAccessMask) == 0) {
+    if (name == nullptr || (options & FwFileOptAccessMask) == 0) {
         return ERR_INVALID_PARMS;
     }
     
@@ -20,51 +20,51 @@ sint32_t FwFileOpen(const str_t name, const uint32_t options, FwFile & fp) {
     DWORD creationDisposition = 0;
     DWORD flagsAndAttr = 0;
     
-    if ((options & kFileOptAccessRead) != 0) {
+    if ((options & FwFileOptAccessRead) != 0) {
         desiredAccess |= GENERIC_READ;
     }
-    if ((options & kFileOptAccessWrite) != 0) {
+    if ((options & FwFileOptAccessWrite) != 0) {
         desiredAccess |= GENERIC_WRITE;
     }
 
-    if ((options & kFileOptAccessRW) == kFileOptAccessRW) {
+    if ((options & FwFileOptAccessRW) == FwFileOptAccessRW) {
         creationDisposition |= OPEN_ALWAYS;
-    } else if ((options & kFileOptAccessRead) != 0) {
+    } else if ((options & FwFileOptAccessRead) != 0) {
         creationDisposition |= OPEN_EXISTING;
-    } else if ((options & kFileOptAccessWrite) != 0) {
+    } else if ((options & FwFileOptAccessWrite) != 0) {
         creationDisposition |= OPEN_ALWAYS;
     }
 
-    if ((options & kFileOptSharedRead) != 0) {
+    if ((options & FwFileOptSharedRead) != 0) {
         sharedModel |= FILE_SHARE_READ;
     }
-    if ((options & kFileOptSharedWrite) != 0) {
+    if ((options & FwFileOptSharedWrite) != 0) {
         sharedModel |= FILE_SHARE_WRITE;
     }
 
-    if ((options & kFileOptFlagRandomAccess) != 0) {
+    if ((options & FwFileOptFlagRandomAccess) != 0) {
         flagsAndAttr |= FILE_FLAG_RANDOM_ACCESS;
-    } else if ((options & kFileOptFlagSequential) != 0) {
+    } else if ((options & FwFileOptFlagSequential) != 0) {
         flagsAndAttr |= FILE_FLAG_SEQUENTIAL_SCAN;
     }
-    if ((options & kFileOptFlagDeleteOnClose) != 0) {
+    if ((options & FwFileOptFlagDeleteOnClose) != 0) {
         flagsAndAttr |= FILE_FLAG_DELETE_ON_CLOSE;
     }
 
     bool isAttrNormal = true;
-    if ((options & kFileOptAttributeEncrypted) != 0) {
+    if ((options & FwFileOptAttributeEncrypted) != 0) {
         flagsAndAttr |= FILE_ATTRIBUTE_ENCRYPTED;
         isAttrNormal = false;
     }
-    if ((options & kFileOptAttributeHidden) != 0) {
+    if ((options & FwFileOptAttributeHidden) != 0) {
         flagsAndAttr |= FILE_ATTRIBUTE_HIDDEN;
         isAttrNormal = false;
     }
-    if ((options & kFileOptAttributeReadOnly) != 0) {
+    if ((options & FwFileOptAttributeReadOnly) != 0) {
         flagsAndAttr |= FILE_ATTRIBUTE_READONLY;
         isAttrNormal = false;
     }
-    if ((options & kFileOptAttributeTemporary) != 0) {
+    if ((options & FwFileOptAttributeTemporary) != 0) {
         flagsAndAttr |= FILE_ATTRIBUTE_TEMPORARY;
         flagsAndAttr |= FILE_ATTRIBUTE_NOT_CONTENT_INDEXED; // インデックスサービス対象外
         isAttrNormal = false;
@@ -88,22 +88,22 @@ sint32_t FwFileOpen(const str_t name, const uint32_t options, FwFile & fp) {
 #else
     tstring opt;
 
-    if ((options & kFileOptAccessRW) == kFileOptAccessRW) {
+    if ((options & FwFileOptAccessRW) == FwFileOptAccessRW) {
         opt += _T("a+b");
-    } else if ((options & kFileOptAccessRead) != 0) {
+    } else if ((options & FwFileOptAccessRead) != 0) {
         opt += _T("rb");
-    } else if ((options & kFileOptAccessWrite) != 0) {
+    } else if ((options & FwFileOptAccessWrite) != 0) {
         opt += _T("w+b");
     }
-    if ((options & kFileOptFlagRandomAccess) != 0) {
+    if ((options & FwFileOptFlagRandomAccess) != 0) {
         opt += _T("R");
-    } else if ((options & kFileOptFlagSequential) != 0) {
+    } else if ((options & FwFileOptFlagSequential) != 0) {
         opt += _T("S");
     }
-    if ((options & kFileOptFlagDeleteOnClose) != 0) {
+    if ((options & FwFileOptFlagDeleteOnClose) != 0) {
         opt += _T("D");
     }
-    if ((options & kFileOptAttributeTemporary) != 0) {
+    if ((options & FwFileOptAttributeTemporary) != 0) {
         opt += _T("T");
     }
 
@@ -124,7 +124,7 @@ sint32_t FwFileClose(FwFile & fp) {
     if (fp.nativeHandle == nullptr) {
         return ERR_INVALID_PARMS;
     }
-    if ((fp.options & kFileOptFlagNoClose) == 0) {
+    if ((fp.options & FwFileOptFlagNoClose) == 0) {
         auto nativeHandle = fp.nativeHandle;
 
         fp.nativeHandle = nullptr;
@@ -240,7 +240,7 @@ sint32_t FwFileGetLengthByName(const str_t name, uint64_t * length) {
     }
     
     FwFile fp;
-    auto result = FwFileOpen(name, kFileOptAccessRead | kFileOptSharedRead, fp);
+    auto result = FwFileOpen(name, FwFileOptAccessRead | FwFileOptSharedRead, fp);
     if (result != FW_OK) {
         return result;
     }

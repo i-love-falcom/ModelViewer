@@ -8,7 +8,8 @@
 #include "core/fw_types.h"
 #include "core/fw_error.h"
 #include "core/fw_allocator.h"
-#include "core/fw_thread.h"
+
+#include "threading/fw_thread.h"
 
 #include "debug/fw_debug_log.h"
 #include "debug/fw_debug_log_listener.h"

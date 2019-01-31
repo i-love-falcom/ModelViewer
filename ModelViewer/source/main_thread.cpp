@@ -77,7 +77,7 @@ void MainThread::StartMainThread(const str_t name) {
     desc.Init();
     desc.userArgs   = args;
     desc.stackSize  = MainThread::kDefaultStackSize;
-    desc.priority   = kTheadPriorityNormal;
+    desc.priority   = FwThreadPriorityNormal;
     desc.affinity   = DefaultFwThreadAffinity;
     tstring::SPrintf(desc.name, FW_ARRAY_SIZEOF(desc.name), name);
 

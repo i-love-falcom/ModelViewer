@@ -216,41 +216,72 @@ constexpr T FwBitShift(size_t shift) {
 #define FW_BIT32(__x)                   FwBitShift<uint32_t>(static_cast<size_t>(__x))
 #define FW_BIT64(__x)                   FwBitShift<uint64_t>(static_cast<size_t>(__x))
 
-#define FW_DEFINE_ENUM_BITFLAG(T)                                               \
-    constexpr T operator|(const T lhs, const T rhs) {                           \
-        using U = typename std::underlying_type<T>::type;                       \
-        return static_cast<T>(static_cast<U>(lhs) | static_cast<U>(rhs));       \
-    }                                                                           \
-                                                                                \
-    constexpr T operator&(const T lhs, const T rhs) {                           \
-        using U = typename std::underlying_type<T>::type;                       \
-        return static_cast<T>(static_cast<U>(lhs) & static_cast<U>(rhs));       \
-    }                                                                           \
-                                                                                \
-    constexpr T operator^(const T lhs, const T rhs) {                           \
-        using U = typename std::underlying_type<T>::type;                       \
-        return static_cast<T>(static_cast<U>(lhs) ^ static_cast<U>(rhs));       \
-    }                                                                           \
-                                                                                \
-    constexpr T operator~(const T val) {                                        \
-        using U = typename std::underlying_type<T>::type;                       \
-        return static_cast<T>(~static_cast<U>(val));                            \
-    }                                                                           \
-                                                                                \
-    inline T& operator|=(T& lhs, const T& rhs) {                                \
-        using U = typename std::underlying_type<T>::type;                       \
-        return lhs = static_cast<T>(static_cast<U>(lhs) | static_cast<U>(rhs)); \
-    }                                                                           \
-                                                                                \
-    inline T& operator&=(T& lhs, const T& rhs) {                                \
-        using U = typename std::underlying_type<T>::type;                       \
-        return lhs = static_cast<T>(static_cast<U>(lhs) & static_cast<U>(rhs)); \
-    }                                                                           \
-                                                                                \
-    inline T& operator^=(T& lhs, const T& rhs) {                                \
-        using U = typename std::underlying_type<T>::type;                       \
-        return lhs = static_cast<T>(static_cast<U>(lhs) ^ static_cast<U>(rhs)); \
-    }
+#define FW_DEFINE_ENUM_BITFLAG(T)                                                       \
+    constexpr T operator|(const T lhs, const T rhs) {                                   \
+        using U = typename std::underlying_type<T>::type;                               \
+        return static_cast<T>(static_cast<U>(lhs) | static_cast<U>(rhs));               \
+    }                                                                                   \
+                                                                                        \
+    constexpr T operator|(const T lhs, const std::underlying_type<T>::type rhs) {       \
+        using U = typename std::underlying_type<T>::type;                               \
+        return static_cast<T>(static_cast<U>(lhs) | rhs);                               \
+    }                                                                                   \
+                                                                                        \
+    constexpr T operator|(const std::underlying_type<T>::type lhs, const T rhs) {       \
+        using U = typename std::underlying_type<T>::type;                               \
+        return static_cast<T>(lhs | static_cast<U>(rhs));                               \
+    }                                                                                   \
+                                                                                        \
+    constexpr T operator&(const T lhs, const T rhs) {                                   \
+        using U = typename std::underlying_type<T>::type;                               \
+        return static_cast<T>(static_cast<U>(lhs) & static_cast<U>(rhs));               \
+    }                                                                                   \
+                                                                                        \
+    constexpr T operator&(const T lhs, const std::underlying_type<T>::type rhs) {       \
+        using U = typename std::underlying_type<T>::type;                               \
+        return static_cast<T>(static_cast<U>(lhs) & rhs);                               \
+    }                                                                                   \
+                                                                                        \
+    constexpr T operator&(const std::underlying_type<T>::type lhs, const T rhs) {       \
+        using U = typename std::underlying_type<T>::type;                               \
+        return static_cast<T>(lhs & static_cast<U>(rhs));                               \
+    }                                                                                   \
+                                                                                        \
+    constexpr T operator^(const T lhs, const T rhs) {                                   \
+        using U = typename std::underlying_type<T>::type;                               \
+        return static_cast<T>(static_cast<U>(lhs) ^ static_cast<U>(rhs));               \
+    }                                                                                   \
+                                                                                        \
+    constexpr T operator^(const T lhs, const std::underlying_type<T>::type rhs) {       \
+        using U = typename std::underlying_type<T>::type;                               \
+        return static_cast<T>(static_cast<U>(lhs) ^ rhs);                               \
+    }                                                                                   \
+                                                                                        \
+    constexpr T operator^(const std::underlying_type<T>::type lhs, const T rhs) {       \
+        using U = typename std::underlying_type<T>::type;                               \
+        return static_cast<T>(lhs ^ static_cast<U>(rhs));                               \
+    }                                                                                   \
+                                                                                        \
+    constexpr T operator~(const T val) {                                                \
+        using U = typename std::underlying_type<T>::type;                               \
+        return static_cast<T>(~static_cast<U>(val));                                    \
+    }                                                                                   \
+                                                                                        \
+    inline T& operator|=(T& lhs, const T& rhs) {                                        \
+        using U = typename std::underlying_type<T>::type;                               \
+        return lhs = static_cast<T>(static_cast<U>(lhs) | static_cast<U>(rhs));         \
+    }                                                                                   \
+                                                                                        \
+    inline T& operator&=(T& lhs, const T& rhs) {                                        \
+        using U = typename std::underlying_type<T>::type;                               \
+        return lhs = static_cast<T>(static_cast<U>(lhs) & static_cast<U>(rhs));         \
+    }                                                                                   \
+                                                                                        \
+    inline T& operator^=(T& lhs, const T& rhs) {                                        \
+        using U = typename std::underlying_type<T>::type;                               \
+        return lhs = static_cast<T>(static_cast<U>(lhs) ^ static_cast<U>(rhs));         \
+    }                                                                                   \
+
 
 
 #ifndef __T

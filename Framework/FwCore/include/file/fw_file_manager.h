@@ -5,7 +5,7 @@
 #ifndef FW_FILE_MANAGER_H_
 #define FW_FILE_MANAGER_H_
 
-#include "core/fw_thread.h"
+#include "threading/fw_thread.h"
 #include "file/fw_file_types.h"
 #include "file/fw_path.h"
 #include "misc/fw_noncopyable.h"
@@ -24,7 +24,7 @@ struct FwFileManagerDesc {
 
     FW_INLINE void Init() {
         _threadAffinity = DefaultFwThreadAffinity;
-        _threadPriority = FwThreadPriority::kTheadPriorityNormal;
+        _threadPriority = FwThreadPriorityNormal;
     }
 };
 
@@ -48,7 +48,7 @@ public:
      * @param[in] priority      処理優先度
      * @return ファイルストリームオブジェクト
      */
-    FW_INLINE FwFileStream * FileStreamOpen(const str_t relativePath, const str_t fileName, const sint32_t options, const uint32_t priority = kFilePriorityNormal) {
+    FW_INLINE FwFileStream * FileStreamOpen(const str_t relativePath, const str_t fileName, const sint32_t options, const FwFilePriority priority = FwFilePriorityNormal) {
         char_t tmpPath[FwPath::kMaxPathLen + 1];
         return DoFileStreamOpen(FwPath::Combine(tmpPath, FW_ARRAY_SIZEOF(tmpPath), GetBasePath(), relativePath, fileName), options, priority);
     }
@@ -61,7 +61,7 @@ public:
      */
     FW_INLINE FwFileStream * FileStreamOpen(const str_t fileName, const sint32_t options) {
         char_t tmpPath[FwPath::kMaxPathLen + 1];
-        return DoFileStreamOpen(FwPath::Combine(tmpPath, FW_ARRAY_SIZEOF(tmpPath), GetBasePath(), fileName), options, kFilePriorityNormal);
+        return DoFileStreamOpen(FwPath::Combine(tmpPath, FW_ARRAY_SIZEOF(tmpPath), GetBasePath(), fileName), options, FwFilePriorityNormal);
     }
 
     /**
@@ -90,7 +90,7 @@ protected:
     /**
      * @brief ファイルを開く
      */
-    virtual FwFileStream * DoFileStreamOpen(const str_t filePath, const sint32_t options, const uint32_t priority) = 0;
+    virtual FwFileStream * DoFileStreamOpen(const str_t filePath, const sint32_t options, const FwFilePriority priority) = 0;
 
     /**
      * @brief 基準となるパスをセット

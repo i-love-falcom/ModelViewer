@@ -10,7 +10,7 @@
 
 BEGIN_NAMESPACE_FW
 
-template<class _Ty, uint32_t _Tag = FwDefaultAllocatorTag>
+template<class _Ty, uint32_t _Tag = FwDefaultMemAllocatorTag>
 class allocator {
 public:
     using value_type            = _Ty;

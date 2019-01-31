@@ -7,6 +7,7 @@
 
 #include <malloc.h>
 #include <crtdbg.h>
+#include <mutex>
 
 
 BEGIN_NAMESPACE_FW
@@ -50,7 +51,7 @@ sint32_t FwGetTagFromMemBlock(void *ptr) {
 /**
  * @class FwAllocactor
  */
-class FwDefaultAllocator : public FwAllocator {
+class FwDefaultAllocator : public FwMemAllocator {
 public:
     /**
      * @brief 動的なメモリ確保
@@ -61,12 +62,17 @@ public:
 
         const size_t realSize = size + sizeof(FwMemBlockHeader) + sizeof(FwMemBlockFooter) + numAligned;
 
-        // メモリブロック取得
+        void * ptr = nullptr;
+        {
+            std::lock_guard<std::recursive_mutex> lock(_mutex);
+
+            // メモリブロック取得
 #if defined(_ISOC11_SOURCE)
-        void * ptr = aligned_alloc(numAligned, realSize);
+            ptr = aligned_alloc(numAligned, realSize);
 #else
-        void * ptr = _aligned_malloc(realSize, numAligned);
+            ptr = _aligned_malloc(realSize, numAligned);
 #endif
+        }
 
         // 先頭アドレス算出
         uintptr_t alignedPtr = RoundUp<uintptr_t>(reinterpret_cast<uintptr_t>(ptr) + sizeof(FwMemBlockHeader), numAligned);
@@ -132,11 +138,16 @@ public:
         FwAssert(footer->magic == s_memBlockMagic);
 
         void * origin = reinterpret_cast<void *>(reinterpret_cast<uintptr_t>(ptr) - header->offsetBytes);
+
+        {
+            std::lock_guard<std::recursive_mutex> lock(_mutex);
+
 #if defined(_ISOC11_SOURCE)
-        free(origin);
+            free(origin);
 #else
-        _aligned_free(origin);
+            _aligned_free(origin);
 #endif
+        }
     }
 
     /**
@@ -152,24 +163,27 @@ public:
     virtual ~FwDefaultAllocator() {
         ;
     }
+
+private:
+    std::recursive_mutex    _mutex;
 };
 
 
 static FwDefaultAllocator   s_defaultAllocator;
-static FwAllocator         *s_allocatorArray[FwMaxAllocatorTag + 1] = { &s_defaultAllocator };
+static FwMemAllocator      *s_allocatorArray[FwMaxMemAllocatorTag + 1] = { &s_defaultAllocator };
 
 END_NAMESPACE_NONAME
 
 
-FwAllocator* FwSetAllocator(sint32_t tag, FwAllocator *allocator) {
-    FwAssert(FwMinAllocatorTag <= tag && tag <= FwMaxAllocatorTag);
-    FwAllocator *oldAllocator = s_allocatorArray[tag];
+FwMemAllocator* FwSetMemAllocator(sint32_t tag, FwMemAllocator *allocator) {
+    FwAssert(FwMinMemAllocatorTag <= tag && tag <= FwMaxMemAllocatorTag);
+    FwMemAllocator *oldAllocator = s_allocatorArray[tag];
     s_allocatorArray[tag] = allocator;
     return oldAllocator;
 }
 
-FwAllocator* FwGetAllocator(sint32_t tag) {
-    FwAssert(FwMinAllocatorTag <= tag && tag <= FwMaxAllocatorTag);
+FwMemAllocator* FwGetMemAllocator(sint32_t tag) {
+    FwAssert(FwMinMemAllocatorTag <= tag && tag <= FwMaxMemAllocatorTag);
     return s_allocatorArray[tag];
 }
 
@@ -181,7 +195,7 @@ FwAllocator* FwGetAllocator(sint32_t tag) {
 #undef FwFree
 
 void * FwMalloc(size_t size, sint32_t tag) {
-    auto allocator = FwGetAllocator(tag);
+    auto allocator = FwGetMemAllocator(tag);
     if (allocator != nullptr) {
         return allocator->Alloc(size, FW_PLATFORM_ALIGN_SIZE, tag);
     }
@@ -191,7 +205,7 @@ void * FwMalloc(size_t size, sint32_t tag) {
 void FwFree(void * ptr) {
     if (ptr != nullptr) {
         auto tag = FwGetTagFromMemBlock(ptr);
-        auto allocator = FwGetAllocator(tag);
+        auto allocator = FwGetMemAllocator(tag);
         allocator->Free(ptr);
     }
 }

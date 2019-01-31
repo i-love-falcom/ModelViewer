@@ -6,7 +6,7 @@
 #include "file/fw_file_manager.h"
 #include "file/fw_file_stream.h"
 #include "file/fw_file.h"
-#include "core/fw_thread.h"
+#include "threading/fw_thread.h"
 #include "container/fw_deque.h"
 #include "container/fw_vector.h"
 
@@ -177,7 +177,7 @@ public:
 
     // ファイルを読み込む
     virtual sint32_t DoRead(void * dst, const sint64_t dstSize, const sint64_t readSize) FW_OVERRIDE {
-        if ((fileHandle.options & kFileOptAccessRead) == 0) {
+        if ((fileHandle.options & FwFileOptAccessRead) == 0) {
             return ERR_INVALID;
         }
 
@@ -200,7 +200,7 @@ public:
 
     // ファイルへ書き込む
     virtual sint32_t DoWrite(const void * src, const sint64_t srcSize, const sint64_t writeSize) FW_OVERRIDE {
-        if ((fileHandle.options & kFileOptAccessWrite) == 0) {
+        if ((fileHandle.options & FwFileOptAccessWrite) == 0) {
             return ERR_INVALID;
         }
 
@@ -262,7 +262,7 @@ public:
 
 
     FileStreamImpl() {
-        seekOrigin = kSeekOriginCurrent;
+        seekOrigin = FwSeekOriginCurrent;
         seekOffset = 0;
         updateFileSeek = true;
     }
@@ -294,7 +294,7 @@ public:
     }
 
     // ファイルストリームを開く
-    virtual FwFileStream * DoFileStreamOpen(const str_t filePath, const sint32_t options, const uint32_t priority) FW_OVERRIDE {
+    virtual FwFileStream * DoFileStreamOpen(const str_t filePath, const sint32_t options, const FwFilePriority priority) FW_OVERRIDE {
         FwFile fp;
         sint32_t result = FwFileOpen(filePath, options, fp);
         if (result != FW_OK) {

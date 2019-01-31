@@ -28,7 +28,6 @@
     <ClInclude Include="include\core\fw_build_config.h" />
     <ClInclude Include="include\core\fw_define.h" />
     <ClInclude Include="include\core\fw_error.h" />
-    <ClInclude Include="include\core\fw_thread.h" />
     <ClInclude Include="include\core\fw_types.h" />
     <ClInclude Include="include\debug\fw_assert.h" />
     <ClInclude Include="include\debug\fw_debug_log.h" />
@@ -41,9 +40,7 @@
     <ClInclude Include="include\file\fw_path.h" />
     <ClInclude Include="include\fw_core.h" />
     <ClInclude Include="include\misc\fw_noncopyable.h" />
-    <ClInclude Include="include\resource\fw_resource.h" />
-    <ClInclude Include="include\resource\fw_resource_manager.h" />
-    <ClInclude Include="include\resource\fw_resource_types.h" />
+    <ClInclude Include="include\threading\fw_thread.h" />
     <ClInclude Include="source\precompiled.h" />
   </ItemGroup>
   <ItemGroup>
@@ -60,8 +57,6 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="source\resource\fw_resource.cpp" />
-    <ClCompile Include="source\resource\fw_resource_manager.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>

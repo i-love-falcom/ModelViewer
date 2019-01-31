@@ -34,37 +34,21 @@ using FwThreadId        = std::thread::id;
 using FwThreadHandle    = std::thread::native_handle_type;
 #endif
 using FwThreadAffinity = uint64_t;
+using FwThreadPriority = sint32_t;
 
 static const size_t             FwMaxThreadNameLen          = 255;
 static const uint32_t           DefaultFwThreadFlags        = 0;
 static const uint32_t           DefaultFwThreadStackSize    = 128 * 1024;
 static const FwThreadAffinity   DefaultFwThreadAffinity     = static_cast<FwThreadAffinity>(0xffffffffffffffff);
 
+static const FwThreadPriority   FwThreadPriorityMin         = 256;
+static const FwThreadPriority   FwThreadPriorityMax         = 1024;
+static const FwThreadPriority   FwThreadPriorityLowest      = (FwThreadPriorityMax - FwThreadPriorityMin) * 1 / 6 + FwThreadPriorityMin;    ///< 最低の優先度
+static const FwThreadPriority   FwThreadPriorityBelowNormal = (FwThreadPriorityMax - FwThreadPriorityMin) * 2 / 6 + FwThreadPriorityMin;    ///< 基準より一段低い優先度
+static const FwThreadPriority   FwThreadPriorityNormal      = (FwThreadPriorityMax - FwThreadPriorityMin) * 3 / 6 + FwThreadPriorityMin;    ///< 基準となる優先度
+static const FwThreadPriority   FwThreadPriorityAboveNormal = (FwThreadPriorityMax - FwThreadPriorityMin) * 4 / 6 + FwThreadPriorityMin;    ///< 基準より一段高い優先度
+static const FwThreadPriority   FwThreadPriorityHighest     = (FwThreadPriorityMax - FwThreadPriorityMin) * 5 / 6 + FwThreadPriorityMin;    ///< 最高の優先度
 
-/**
- * @enum threadPriority_t
- */
-enum FwThreadPriority : sint32_t {
-#if FW_THREAD == FW_THREAD_WIN32
-    kThreadPriorityMin          = THREAD_BASE_PRIORITY_IDLE,
-    kThreadPriorityMax          = THREAD_PRIORITY_TIME_CRITICAL,
-    
-    kTheadPriorityLowest        = THREAD_PRIORITY_LOWEST,           ///< 最低の優先度
-    kTheadPriorityBelowNormal   = THREAD_PRIORITY_BELOW_NORMAL,     ///< 基準より一段低い優先度
-    kTheadPriorityNormal        = THREAD_PRIORITY_NORMAL,           ///< 基準となる優先度
-    kTheadPriorityAboveNormal   = THREAD_PRIORITY_ABOVE_NORMAL,     ///< 基準より一段高い優先度
-    kTheadPriorityHighest       = THREAD_PRIORITY_HIGHEST,          ///< 最高の優先度
-#elif FW_THREAD == FW_THREAD_STL
-    kThreadPriorityMin          = 256,
-    kThreadPriorityMax          = 1024,
-    
-    kTheadPriorityLowest        = (kThreadPriorityMax - kThreadPriorityMin) * 1 / 6 + kThreadPriorityMin,    ///< 最低の優先度
-    kTheadPriorityBelowNormal   = (kThreadPriorityMax - kThreadPriorityMin) * 2 / 6 + kThreadPriorityMin,    ///< 基準より一段低い優先度
-    kTheadPriorityNormal        = (kThreadPriorityMax - kThreadPriorityMin) * 3 / 6 + kThreadPriorityMin,    ///< 基準となる優先度
-    kTheadPriorityAboveNormal   = (kThreadPriorityMax - kThreadPriorityMin) * 4 / 6 + kThreadPriorityMin,    ///< 基準より一段高い優先度
-    kTheadPriorityHighest       = (kThreadPriorityMax - kThreadPriorityMin) * 5 / 6 + kThreadPriorityMin,    ///< 最高の優先度
-#endif
-};
 
 /**
  * @struct ThreadDesc
@@ -74,7 +58,7 @@ public:
     void *              userArgs;
     uint32_t            flags;
     uint32_t            stackSize;
-    sint32_t            priority;
+    FwThreadPriority    priority;
     FwThreadAffinity    affinity;
     char_t              name[FwMaxThreadNameLen + 1];
 
@@ -85,7 +69,7 @@ public:
         userArgs    = nullptr;
         flags       = DefaultFwThreadFlags;
         stackSize   = DefaultFwThreadStackSize;
-        priority    = FwThreadPriority::kTheadPriorityNormal;
+        priority    = FwThreadPriorityNormal;
         affinity    = DefaultFwThreadAffinity;
         name[0]     = _T('\0');
     }

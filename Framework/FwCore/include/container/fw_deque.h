@@ -12,7 +12,7 @@
 
 BEGIN_NAMESPACE_FW
 
-template<class _Ty, uint32_t _Tag = FwDefaultAllocatorTag >
+template<class _Ty, uint32_t _Tag = FwDefaultMemAllocatorTag >
 class deque : public std::deque<_Ty, NAMESPACE_FW allocator<_Ty, _Tag> > {
 public:
     typedef deque<_Ty, _Tag>                                        _My;

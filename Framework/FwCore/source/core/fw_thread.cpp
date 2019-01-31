@@ -3,7 +3,7 @@
  * @author Kamai Masayoshi
  */
 #include "precompiled.h"
-#include "core/fw_thread.h"
+#include "threading/fw_thread.h"
 
 BEGIN_NAMESPACE_FW
 /**
@@ -122,6 +122,23 @@ static unsigned __stdcall ThreadEntryFunction(void * userArgs) {
 
     return 0;
 }
+
+static sint32_t GetNativeThreadPriority(const FwThreadPriority priority) {
+#if FW_THREAD == FW_THREAD_WIN32
+    switch (priority) {
+    case FwThreadPriorityMin:            return THREAD_BASE_PRIORITY_IDLE;
+    case FwThreadPriorityLowest:         return THREAD_PRIORITY_LOWEST;
+    case FwThreadPriorityBelowNormal:    return THREAD_PRIORITY_BELOW_NORMAL;
+    case FwThreadPriorityNormal:         return THREAD_PRIORITY_NORMAL;
+    case FwThreadPriorityAboveNormal:    return THREAD_PRIORITY_ABOVE_NORMAL;
+    case FwThreadPriorityHighest:        return THREAD_PRIORITY_HIGHEST;
+    case FwThreadPriorityMax:            return THREAD_PRIORITY_TIME_CRITICAL;
+    }
+    return 0;
+#elif FW_THREAD == FW_THREAD_STL
+    return priority;
+#endif
+}
 END_NAMESPACE_NONAME
 
 FwThread::FwThread()
@@ -192,7 +209,7 @@ void FwThread::StartThread(const bool workerThread) {
 #if defined(FW_PLATFORM_WIN32)
     FwThreadHandle hThread = GetThreadHandle();
     ::SetThreadAffinityMask(reinterpret_cast<HANDLE>(hThread), desc.affinity);
-    ::SetThreadPriority(reinterpret_cast<HANDLE>(hThread), desc.priority);
+    ::SetThreadPriority(reinterpret_cast<HANDLE>(hThread), GetNativeThreadPriority(desc.priority));
 #else
     //! @todo プラットフォーム対応
 #endif
